@@ -4,11 +4,12 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <tr1/memory> // For std::tr1::shared_ptr
 
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.2 2011-07-07 04:06:19 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.3 2011-07-07 18:30:43 copi Exp $");
   /// @endcond
 }
 
@@ -25,11 +26,19 @@ namespace {
  *  are the same, however, for a masked sky or for the pixels not in order
  *  (for some reason) then the pixel index is \b not the same as the pixel
  *  number.  To get the pixel number use the appropriate entry from pixel_list().
+ *
+ *  Reading and writing two point tables are different processes and are
+ *  internally treated differently.  You should not mix reading and writing
+ *  of tables.  The intention is to have one code create the tables and
+ *  other codes use them.
  */
 template<typename T>
 class Twopt_Table {
 private :
-  std::vector<std::vector<T> > table;
+  // The write table has to be allowed to grow.
+  std::vector<std::vector<T> > table_write;
+  // The read table is a known size.
+  std::tr1::shared_ptr<T> table_read;
   std::vector<T> pixlist;
   double cosbin;
   size_t nmax;
@@ -39,17 +48,17 @@ public :
    */
   //@{
   /// Generic constructor.
-  Twopt_Table () : table(), pixlist(), cosbin(0), nmax(0) {}
+  Twopt_Table () : table_write(), table_read(), pixlist(), cosbin(0), nmax(0) {}
   /** Construct a table given the pixel list and the value of the left edge
    *  of the bin.
   */
   Twopt_Table (const std::vector<T>& pl, double binvalue)
-    : table(pl.size()), pixlist(pl), cosbin(binvalue), nmax(0) {}
+    : table_write(pl.size()), table_read(), pixlist(pl), cosbin(binvalue), nmax(0) {}
   //@}
 
   /// Add an entry to the two point table.
   inline void add (const T& i, const T& j)
-  { table[i].push_back(j); }
+  { table_write[i].push_back(j); }
 
   /** Add a pair symmetrically to the two point table.
    *  This is equivalent to calling add() twice for the pairs \a i,\a j and
@@ -86,7 +95,7 @@ public :
     // Now figure out what the maximum number of values in a pixel bin are
     nmax = 0;
     for (size_t p=0; p < Npix; ++p) {
-      nmax = std::max (nmax, table[p].size());
+      nmax = std::max (nmax, table_write[p].size());
     }
     out.write (reinterpret_cast<char*>(&nmax), sizeof(nmax));
 
@@ -95,8 +104,8 @@ public :
     T minusone = -1;
     for (size_t p=0; p < Npix; ++p) {
       size_t k;
-      for (k=0; k < table[p].size(); ++k) {
-	out.write (reinterpret_cast<char*>(&table[p][k]), sizeof(T));
+      for (k=0; k < table_write[p].size(); ++k) {
+	out.write (reinterpret_cast<char*>(&table_write[p][k]), sizeof(T));
       }
       for (; k < nmax; ++k) {
 	out.write (reinterpret_cast<char*>(&minusone), sizeof(T));
@@ -116,8 +125,9 @@ public :
     size_t Npix;
     std::ifstream in (filename.c_str(),
 		      std::fstream::in | std::fstream::binary);
-  if (! in) return false;
+    if (! in) return false;
 
+    int nmax_old = nmax;
     // First header
     in.read (&version, sizeof(version));
     if (version != 1) {
@@ -131,14 +141,12 @@ public :
       in.read (reinterpret_cast<char*>(&pixlist[p]), sizeof(T));
     }
     in.read (reinterpret_cast<char*>(&nmax), sizeof(nmax));
-    table.resize(Npix);
-    for (size_t p=0; p < Npix; ++p) {
-      table[p].resize(nmax);
-      for (size_t k=0; k < nmax; ++k) {
-	in.read (reinterpret_cast<char*>(&table[p][k]), sizeof(T));
-      }
-    }
-    
+    if (nmax != nmax_old)
+      table_read = std::tr1::shared_ptr<T>(new T [Npix*nmax]);
+    in.read (reinterpret_cast<char*>(table_read.get()), Npix*nmax*sizeof(T));
+
+    std::cerr << "Read " << filename << std::endl;
+
     in.close();
     return true;
   }
@@ -150,7 +158,7 @@ public :
    *  table.
    */
   inline void reset()
-  { for (size_t p=0; p < table.size(); ++p) table[p].clear(); }
+  { for (size_t p=0; p < table_write.size(); ++p) table_write[p].clear(); }
 
   /** \name Accessors
    *  Access internal information.
@@ -164,9 +172,14 @@ public :
   inline size_t Npix() const { return pixlist.size(); }
   /// The maximum number of values in each row of the table.
   inline size_t Nmax() const { return nmax; }
-  /// Value from the two point table.
-  inline T operator() (T i, T j) const
-  { return table[i][j]; }
+  /// Value from the two point write table.
+  inline T& get_write_value (T i, T j)
+  { return table_write[i][j]; }
+  /** Value from the two point read table.
+   *  This value cannot be changed.
+   */
+  inline const T& get_read_value (T i, T j) const
+  { return table_read.get()[i*Nmax()+j]; }
   //@}
 
   /// Assign the value of the left edge of the bin.
