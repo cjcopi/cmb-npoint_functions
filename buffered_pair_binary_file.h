@@ -8,7 +8,7 @@
 namespace {
   /// @cond IDTAG
   const std::string BUFFERED_PAIR_BINARY_FILE_RCSID
-  ("$Id$");
+  ("$Id: buffered_pair_binary_file.h,v 1.1 2011-07-07 02:42:50 copi Exp $");
   /// @endcond
 }
 
@@ -79,7 +79,7 @@ class buffered_pair_binary_file {
     fd->open (fname.c_str(), std::fstream::in | std::fstream::binary);
     // Get total number of entries in the file.
     fd->seekg (0, std::ios::end);
-    Ntotal = fd->tellg() / (2 * sizeof(T));
+    Ntotal = fd->tellg() / sizeof(T);
     // Rewind
     fd->seekg (0, std::ios::beg);
     nbuf_read = 0;
