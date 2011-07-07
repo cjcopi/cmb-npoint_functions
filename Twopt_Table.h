@@ -8,7 +8,7 @@
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id$");
+  ("$Id: Twopt_Table.h,v 1.1 2011-07-07 02:41:27 copi Exp $");
   /// @endcond
 }
 
@@ -109,6 +109,8 @@ public :
     size_t Npix;
     std::ifstream in (filename.c_str(),
 		      std::fstream::in | std::fstream::binary);
+  if (! in) return false;
+
     // First header
     in.read (&version, sizeof(version));
     if (version != 1) {
