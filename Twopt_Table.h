@@ -8,16 +8,23 @@
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.1 2011-07-07 02:41:27 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.2 2011-07-07 04:06:19 copi Exp $");
   /// @endcond
 }
 
 /** Storage for a single bin of a two point table.
+ *
  *  A two point table consists of a list of pixels in the NEST scheme, the
- *  value of the lower edge of the bin, and a rectangle table of pixels in
- *  the bin.  The size of the table is Npix() x Nmax() where Nmax() is the
- *  maximum number of entries in a row.  The table is "-1" padded to make
- *  it rectangular.
+ *  value of the lower edge of the bin, and a rectangle table of pixel
+ *  indices in the bin.  The size of the table is Npix() x Nmax() where
+ *  Nmax() is the maximum number of entries in a row.  The table is "-1"
+ *  padded to make it rectangular.
+ *
+ *  Note that the pixel \b index is stored in the table, not the pixel
+ *  number itself.  For a full sky map with the pixels in order these two
+ *  are the same, however, for a masked sky or for the pixels not in order
+ *  (for some reason) then the pixel index is \b not the same as the pixel
+ *  number.  To get the pixel number use the appropriate entry from pixel_list().
  */
 template<typename T>
 class Twopt_Table {
@@ -157,6 +164,9 @@ public :
   inline size_t Npix() const { return pixlist.size(); }
   /// The maximum number of values in each row of the table.
   inline size_t Nmax() const { return nmax; }
+  /// Value from the two point table.
+  inline T operator() (T i, T j) const
+  { return table[i][j]; }
   //@}
 
   /// Assign the value of the left edge of the bin.
