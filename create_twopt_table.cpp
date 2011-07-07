@@ -18,18 +18,32 @@
 
 namespace {
   const std::string CREATE_TWOPT_TABLE_RCSID
-  ("$Id$");
+  ("$Id: create_twopt_table.cpp,v 1.1 2011-07-07 02:41:27 copi Exp $");
 }
 
 void dtheta_to_cosbin (double dtheta, std::vector<double>& cosbin)
 {
   dtheta *= M_PI / 180.0; // Convert from degrees to radians
   size_t Nbin = M_PI/dtheta;
-  cosbin.resize(Nbin);
+  cosbin.clear();
   double theta = M_PI;
-  for (size_t j=0; j < cosbin.size(); ++j) {
-    cosbin[j] = std::cos(theta);
+  while (theta > 0) {
+    cosbin.push_back(std::cos(theta));
     theta -= dtheta;
+  }
+  /* We MUST have the 1.0 bin for the bin finding algorithm below
+   * even though nothing can be in it.
+   */
+  if (std::abs(cosbin[cosbin.size()-1] - 1) > 1.0e-12) cosbin.push_back(1.0);
+}
+void dcostheta_to_cosbin (double dcostheta, std::vector<double>& cosbin)
+{
+  size_t Nbin = 2/dcostheta;
+  cosbin.clear();
+  double cb = -1;
+  while (cb < 1) {
+    cosbin.push_back(cb);
+    cb += dcostheta;
   }
   /* We MUST have the 1.0 bin for the bin finding algorithm below
    * even though nothing can be in it.
@@ -61,13 +75,19 @@ int main (int argc, char *argv[])
   paramfile params (argv[1]);
   int Nside = params.find<int> ("Nside", -1);
   std::string maskfile = params.find<std::string> ("maskfile", "");
-  double dtheta = params.find<double> ("dtheta");
+  double dtheta = params.find<double> ("dtheta", -200);
+  double dcostheta = params.find<double> ("dcostheta", -200);
   std::string tmpfile_prefix = params.find<std::string> ("tmpfile_prefix");
   std::string twoptfile_prefix = params.find<std::string> ("twoptfile_prefix");
   bool clean_tmpfiles = params.find<bool> ("clean_tmpfiles", false);
 
   if ((Nside == -1) && (maskfile == "")) {
     std::cerr << "Maskfile or Nside must be set in the parameter file.\n";
+    return 1;
+  }
+
+  if ((dtheta == -200) && (dcostheta == -200)) {
+    std::cerr << "dtheta or dcostheta must be set in the parameter file.\n";
     return 1;
   }
 
@@ -82,7 +102,11 @@ int main (int argc, char *argv[])
     std::generate (pixel_list.begin(), pixel_list.end(), myRange<int>());
   }
 
-  dtheta_to_cosbin (dtheta, bin_list);
+  if (dcostheta != -200) {
+    dcostheta_to_cosbin (dcostheta, bin_list);
+  } else {
+    dtheta_to_cosbin (dtheta, bin_list);
+  }
 
   size_t Npix = pixel_list.size();
   size_t Nbin = bin_list.size() - 1;
@@ -157,7 +181,6 @@ int main (int argc, char *argv[])
       while (binfile.read_next_pair (i, j)) {
 	twopt_table.add_pair (i, j);
       }
-
       if (clean_tmpfiles) unlink(sstr.str().c_str());
 
       sstr.str("");
