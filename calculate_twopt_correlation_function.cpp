@@ -11,7 +11,7 @@
 
 namespace {
   const std::string CALCULATE_TWOPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: create_twopt_table.cpp,v 1.1 2011-07-07 02:41:27 copi Exp $");
+  ("$Id: calculate_twopt_correlation_function.cpp,v 1.1 2011-07-07 04:06:42 copi Exp $");
 }
 
 
@@ -34,26 +34,29 @@ int main (int argc, char *argv[])
   
   std::ostringstream sstr;
   int Nbin = 0;
-  size_t Npair = 0;
+  size_t Npair;
   double C2, Csum;
+  int p1, p2;
   Twopt_Table<int> twopt_table;
   while (true) {
     sstr.str("");
     sstr << twopt_prefix << std::setw(5) << std::setfill('0') << Nbin << ".dat";
     if (! twopt_table.read_file (sstr.str())) break;
     C2 = 0;
+    Npair = 0;
     for (size_t i=0; i < twopt_table.Npix(); ++i) {
       Csum = 0;
+      p1 = twopt_table.pixel_list()[i];
       for (size_t j=0;
 	   ((j < twopt_table.Nmax())
-	    && (twopt_table.pixel_list()[j] != -1));
+	    && (twopt_table(i,j) != -1));
 	   ++j) {
-	if (twopt_table.pixel_list()[i] > twopt_table.pixel_list()[j])
-	  continue;
+	p2 = twopt_table.pixel_list()[twopt_table(i,j)];
+	if (p1 > p2) continue; // Avoid double counting.
 	++Npair;
-	Csum += map[twopt_table.pixel_list()[j]];
+	Csum += map[p2];
       }
-      C2 += map[twopt_table.pixel_list()[i]] * Csum;
+      C2 += map[p1] * Csum;
     }
     C2 /= Npair;
     std::cout << twopt_table.bin_value() << " " << C2 << std::endl;
