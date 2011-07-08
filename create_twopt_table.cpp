@@ -19,7 +19,7 @@
 
 namespace {
   const std::string CREATE_TWOPT_TABLE_RCSID
-  ("$Id: create_twopt_table.cpp,v 1.2 2011-07-07 22:25:04 copi Exp $");
+  ("$Id: create_twopt_table.cpp,v 1.3 2011-07-08 06:01:14 copi Exp $");
 }
 
 void dtheta_to_cosbin (double dtheta, std::vector<double>& cosbin)
@@ -32,10 +32,6 @@ void dtheta_to_cosbin (double dtheta, std::vector<double>& cosbin)
     cosbin.push_back(std::cos(theta));
     theta -= dtheta;
   }
-  /* We MUST have the 1.0 bin for the bin finding algorithm below
-   * even though nothing can be in it.
-   */
-  if (std::abs(cosbin[cosbin.size()-1] - 1) > 1.0e-12) cosbin.push_back(1.0);
 }
 void dcostheta_to_cosbin (double dcostheta, std::vector<double>& cosbin)
 {
@@ -46,10 +42,6 @@ void dcostheta_to_cosbin (double dcostheta, std::vector<double>& cosbin)
     cosbin.push_back(cb);
     cb += dcostheta;
   }
-  /* We MUST have the 1.0 bin for the bin finding algorithm below
-   * even though nothing can be in it.
-   */
-  if (std::abs(cosbin[cosbin.size()-1] - 1) > 1.0e-12) cosbin.push_back(1.0);
 }
 void mask_to_pixlist (const Healpix_Map<double>& mask,
 		      std::vector<int>& pixlist)
@@ -181,7 +173,18 @@ int main (int argc, char *argv[])
       dp = std::min (dp,  1.0);
       if (dp > bin_list[ibin]) dir = +1;
       else dir = -1;
-      while ((dp < bin_list[ibin]) || (dp > bin_list[ibin+1])) ibin += dir;
+      /* Find the bin.  Since we use the NEST scheme a simple linear search
+       *  is efficient; sequential pixels are near each other so it should
+       *  be a short walk between pixel pairs.
+       *
+       *  We do NOT require the bin list to be inclusive, ie start at -1
+       *  (or smaller) and end at 1 (or larger).  If a value is "off the
+       *  end" of the list we stick the value in the first or last bin, as
+       *  appropriate.
+       */
+      while (((dp < bin_list[ibin]) || (dp > bin_list[ibin+1]))
+	     && (((ibin != 0) && (dir < 0)) || ((ibin != Nbin-2) && (dir > 0))))
+	ibin += dir;
       binfiles[ibin].append(i, j);
     }
   }
@@ -194,8 +197,8 @@ int main (int argc, char *argv[])
   /* Now create the 2 point tables.  For each table these are 2 dim arrays
    * of size Npix x ?, indexed as (p,?) where p is the pixel at the center.
    * The entries in the table are the pixels paired with p that are in the
-   * given bin. Note that this table may not be completely full if dtheta
-   * is small compared to Nside. */
+   * given bin. Note that this table may not be completely full if the bins
+   * are small compared to Nside. */
   std::cout << "Creating two point tables.\n";
 
 #pragma omp parallel shared(binfiles, Nbin, Npix, pixel_list, bin_list, \
