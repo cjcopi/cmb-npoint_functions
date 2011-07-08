@@ -9,6 +9,7 @@
 #include <healpix_base.h>
 #include <healpix_map.h>
 #include <healpix_map_fitsio.h>
+#include <string_utils.h> // For parsing a text file
 #include <paramfile.h>
 #include <vec3.h>
 
@@ -18,7 +19,7 @@
 
 namespace {
   const std::string CREATE_TWOPT_TABLE_RCSID
-  ("$Id: create_twopt_table.cpp,v 1.1 2011-07-07 02:41:27 copi Exp $");
+  ("$Id: create_twopt_table.cpp,v 1.2 2011-07-07 22:25:04 copi Exp $");
 }
 
 void dtheta_to_cosbin (double dtheta, std::vector<double>& cosbin)
@@ -59,6 +60,36 @@ void mask_to_pixlist (const Healpix_Map<double>& mask,
   }
 }
 
+bool read_text_file (const std::string& cosbinfile,
+		     std::vector<double>& bin_list)
+{
+  /* Read the file line by line and extract the first column.
+   *  Anything following a # is a comment.
+   */
+  std::string line;
+  std::string::iterator it;
+  std::vector<double> vals;
+  std::ifstream in (cosbinfile.c_str());
+  if (! in.is_open()) return false;
+
+  bin_list.clear();
+  while (in.good()) {
+    std::getline (in, line);
+    line = trim (line);
+    it = std::find (line.begin(), line.end(), '#');
+    if (it != line.end()) line.erase (it, line.end());
+    if (line == "") continue;
+    vals.clear();
+    split (line, vals);
+    bin_list.push_back(vals[0]);
+  }
+  in.close();
+  // Make sure the list ends with the 1.0 bin
+  if (abs(bin_list[bin_list.size()-1] - 1) > 1.0e-12)
+    bin_list.push_back (1.0);
+  return true;
+}
+  
 void usage (const char *progname)
 {
   std::cerr << "Usage: " << progname << " <parameter file name>\n";
@@ -77,6 +108,7 @@ int main (int argc, char *argv[])
   std::string maskfile = params.find<std::string> ("maskfile", "");
   double dtheta = params.find<double> ("dtheta", -200);
   double dcostheta = params.find<double> ("dcostheta", -200);
+  std::string cosbinfile = params.find<std::string> ("cosbinfile", "");
   std::string tmpfile_prefix = params.find<std::string> ("tmpfile_prefix");
   std::string twoptfile_prefix = params.find<std::string> ("twoptfile_prefix");
   bool clean_tmpfiles = params.find<bool> ("clean_tmpfiles", false);
@@ -86,8 +118,9 @@ int main (int argc, char *argv[])
     return 1;
   }
 
-  if ((dtheta == -200) && (dcostheta == -200)) {
-    std::cerr << "dtheta or dcostheta must be set in the parameter file.\n";
+  if ((dtheta == -200) && (dcostheta == -200) && (cosbinfile == "")) {
+    std::cerr << "A source of bins must be provided in the parameter file\n"
+	      << "  Set cosbinfile, dtheta, or dcostheta.\n";
     return 1;
   }
 
@@ -102,7 +135,12 @@ int main (int argc, char *argv[])
     std::generate (pixel_list.begin(), pixel_list.end(), myRange<int>());
   }
 
-  if (dcostheta != -200) {
+  if (cosbinfile != "") {
+    if (! read_text_file (cosbinfile, bin_list)) {
+      std::cerr << "Failed reading " << cosbinfile << std::endl;
+      return 1;
+    }
+  } else if (dcostheta != -200) {
     dcostheta_to_cosbin (dcostheta, bin_list);
   } else {
     dtheta_to_cosbin (dtheta, bin_list);
