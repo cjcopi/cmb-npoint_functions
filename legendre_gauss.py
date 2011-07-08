@@ -2,7 +2,7 @@
 quadrature.  These routines are not optimized but work fast enough for l ~
 500 that I am not worried about speeding them up."""
 
-# $Id$
+# $Id: legendre_gauss.py,v 1.1 2011-07-08 05:50:24 copi Exp $
 
 import scipy.special as sf
 import scipy.optimize as opt
@@ -43,7 +43,7 @@ def weights (l, Plzeros) :
         w[j] = 2 * (1-Plzeros[j]**2) / ((l+1)*Pl_func(Plzeros[j], l+1))**2
     return w
 
-def abscissa_weights (l, tol=1.0-12) :
+def abscissa_weights (l, tol=1.0e-12) :
     """Return a tuple containing the abscissas (zeros of the Legendre
     polynomial of order l) and the weights for Legendre-Gauss quadrature.
     See Pl_zeros() and weights() for more details.
