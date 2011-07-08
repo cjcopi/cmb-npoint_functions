@@ -19,7 +19,7 @@
 
 namespace {
   const std::string CREATE_TWOPT_TABLE_RCSID
-  ("$Id: create_twopt_table.cpp,v 1.3 2011-07-08 06:01:14 copi Exp $");
+  ("$Id: create_twopt_table.cpp,v 1.4 2011-07-08 06:18:19 copi Exp $");
 }
 
 void dtheta_to_cosbin (double dtheta, std::vector<double>& cosbin)
@@ -118,7 +118,7 @@ int main (int argc, char *argv[])
 
   Healpix_Map<double> mask;
   if (maskfile != "") {
-    read_Healpix_map_from_fits ("mask_r7_kq75y7.fits", mask);
+    read_Healpix_map_from_fits (maskfile, mask);
     if (mask.Scheme() == RING) mask.swap_scheme();
     Nside = mask.Nside();
     mask_to_pixlist (mask, pixel_list);
@@ -140,6 +140,10 @@ int main (int argc, char *argv[])
 
   size_t Npix = pixel_list.size();
   size_t Nbin = bin_list.size() - 1;
+  std::cout << "Generating for\n Nside = " << Nside
+	    << "\n Npix = " << Npix
+	    << "\n Nbin = " << Nbin
+	    << std::endl;
 
   Healpix_Base HBase (Nside, NEST, SET_NSIDE);
   // Create list of vectors.
@@ -182,8 +186,8 @@ int main (int argc, char *argv[])
        *  end" of the list we stick the value in the first or last bin, as
        *  appropriate.
        */
-      while (((dp < bin_list[ibin]) || (dp > bin_list[ibin+1]))
-	     && (((ibin != 0) && (dir < 0)) || ((ibin != Nbin-2) && (dir > 0))))
+      while ( (((ibin != 0) && (dir < 0)) || ((ibin != Nbin-1) && (dir > 0)))
+	      && ((dp < bin_list[ibin]) || (dp > bin_list[ibin+1])))
 	ibin += dir;
       binfiles[ibin].append(i, j);
     }
