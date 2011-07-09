@@ -6,13 +6,12 @@
 #include <fstream>
 #include <tr1/memory> // For std::tr1::shared_ptr
 
-#include <lzma.h>
-#include <inttypes.h>
+#include <LZMA_Wrapper.h>
 
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.5 2011-07-09 05:07:01 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.6 2011-07-09 17:02:34 copi Exp $");
   /// @endcond
 }
 
@@ -47,7 +46,7 @@ namespace {
  *  more CPU power/memory to decompress the data.
  */
 template<typename T>
-class Twopt_Table {
+class Twopt_Table : private LZMA_Wrapper {
 private :
   // The write table has to be allowed to grow.
   std::vector<std::vector<T> > table_write;
@@ -76,67 +75,9 @@ private :
       }
     }
 
-    /* Create the compression buffer.  We know the data CAN be compressed
-     * so we set this to be the same size as the full buffer.  This is
-     * overkill but should should be safe.
-     */
     size_t Nbytes = Nelem * sizeof(T) / sizeof(uint8_t);
-    std::tr1::shared_ptr<uint8_t> buf_comp (new uint8_t [Nbytes]);
-    lzma_ret ret;
-    lzma_stream strm = LZMA_STREAM_INIT;
 
-    // Initialize the buffer
-    ret = lzma_easy_encoder (&strm, compression_level, LZMA_CHECK_CRC64);
-    if (ret != LZMA_OK) {
-      std::cerr << "Error initializing compression buffer : "
-                << ret << std::endl;
-      return false;
-    }
-#if 0 // If we need to do the compression in chunks instead of all at once.
-    size_t compression_chunk = 1024*1024;
-    size_t out_offset;
-    size_t Nbytes_compressed;
-    out_offset = 0;
-    Nbytes_compressed = 0;
-    size_t Ncompress = std::min (compression_chunk,
-				 Nbytes-Nbytes_compressed);
-    strm.next_in  = reinterpret_cast<uint8_t*>(buf_full.get());
-    strm.next_out = buf_comp.get();
-    while (Ncompress > 0) {
-      strm.avail_in = Ncompress;
-      strm.avail_out = Nbytes - out_offset;
-
-      ret = lzma_code (&strm, LZMA_RUN);
-      if (ret != LZMA_OK) {
-	std::cerr << "Error compressing buffer : " << ret << std::endl;
-	return false;
-      }
-      Nbytes_compressed += Ncompress;
-      out_offset += Nbytes - out_offset - strm.avail_out;
-      Ncompress = std::min (compression_chunk,
-			    Nbytes-Nbytes_compressed);
-    };
-#else
-    strm.next_in  = reinterpret_cast<uint8_t*>(buf_full.get());
-    strm.next_out = buf_comp.get();
-    strm.avail_in = Nbytes;
-    strm.avail_out = Nbytes;
-
-    ret = lzma_code (&strm, LZMA_RUN);
-    if (ret != LZMA_OK) {
-      std::cerr << "Error compressing buffer : " << ret << std::endl;
-      return false;
-    }
-#endif
-    ret = lzma_code (&strm, LZMA_FINISH);
-    if ((ret != LZMA_OK) && (ret != LZMA_STREAM_END)) {
-      std::cerr << "Error cleaning up compression buffer : "
-                << ret << std::endl;
-      return false;
-    }
-    out.write (reinterpret_cast<char*>(buf_comp.get()), strm.total_out);
-    lzma_end (&strm);
-    return true;
+    return write_buffer (out, buf_full.get(), Nbytes);
   }
 
   /** Read the table from the stream with compression.
@@ -145,42 +86,10 @@ private :
   bool read_table_from_stream (std::ifstream& in,
 			       std::tr1::shared_ptr<T> *buf)
   {
-    *buf = std::tr1::shared_ptr<T>(new T [Nmax()*Npix()]);
-    // First read in compressed values from the file.
-    std::streampos curpos = in.tellg();
-    in.seekg (0, std::ios::end);
-    size_t in_len = in.tellg() - curpos;
-    in.seekg (curpos, std::ios::beg);
-    std::tr1::shared_ptr<uint8_t> buf_comp (new uint8_t [ in_len ]);
-    in.read (reinterpret_cast<char*>(buf_comp.get()), in_len);
+    size_t Nelem = Nmax()*Npix();
+    *buf = std::tr1::shared_ptr<T>(new T [Nelem]);
 
-    // Now decompress and fill in buf
-    lzma_stream strm = LZMA_STREAM_INIT;
-    lzma_ret ret;
-    ret = lzma_stream_decoder (&strm, UINT64_MAX, 0);
-    if (ret != LZMA_OK) {
-      std::cerr << "Error initializing decompression : "
-                << ret << std::endl;
-      return false;
-    }
-    strm.next_in = buf_comp.get();
-    strm.avail_in = in_len;
-    strm.next_out = reinterpret_cast<uint8_t*>(buf->get());
-    strm.avail_out = Nmax()*Npix() * sizeof(T)/sizeof(uint8_t);
-
-    ret = lzma_code (&strm, LZMA_RUN);
-    if ((ret != LZMA_OK) && (ret != LZMA_STREAM_END)) {
-      std::cerr << "Error decompressing buffer : " << ret << std::endl;
-      return false;
-    }
-    ret = lzma_code (&strm, LZMA_FINISH);
-    if ((ret != LZMA_OK) && (ret != LZMA_STREAM_END)) {
-      std::cerr << "Error cleaning up decompression buffer : "
-                << ret << std::endl;
-      return false;
-    }
-    lzma_end (&strm);
-    return true;
+    return read_buffer (in, buf->get(), Nelem*sizeof(T)/sizeof(uint8_t));
   }
 public :
   /** \name Constructors
