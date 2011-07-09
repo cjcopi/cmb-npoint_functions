@@ -19,7 +19,7 @@
 
 namespace {
   const std::string CREATE_TWOPT_TABLE_RCSID
-  ("$Id: create_twopt_table.cpp,v 1.4 2011-07-08 06:18:19 copi Exp $");
+  ("$Id: create_twopt_table.cpp,v 1.5.2.1 2011-07-09 05:04:35 copi Exp $");
 }
 
 void dtheta_to_cosbin (double dtheta, std::vector<double>& cosbin)
@@ -153,6 +153,7 @@ int main (int argc, char *argv[])
   }
 
   std::vector<buffered_pair_binary_file<int> > binfiles;
+#ifndef USE_TEMPFILES
   {
     std::ostringstream fstr;
     for (int k=0; k < Nbin; ++k) {
@@ -197,6 +198,7 @@ int main (int argc, char *argv[])
    */
   binfiles.clear();
   std::cout << "Temporary files created.\n";
+#endif
 
   /* Now create the 2 point tables.  For each table these are 2 dim arrays
    * of size Npix x ?, indexed as (p,?) where p is the pixel at the center.
@@ -212,7 +214,7 @@ int main (int argc, char *argv[])
 
     int i, j;
     std::ostringstream sstr;
-#pragma omp for schedule(static)
+#pragma omp for schedule(guided)
     for (size_t k=0; k < Nbin; ++k) {
       twopt_table.reset();
       twopt_table.bin_value (bin_list[k]);

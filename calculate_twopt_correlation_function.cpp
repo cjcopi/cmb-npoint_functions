@@ -5,19 +5,19 @@
 
 #include <healpix_map.h>
 #include <healpix_map_fitsio.h>
-//#include <paramfile.h>
 
 #include <Twopt_Table.h>
 
 namespace {
   const std::string CALCULATE_TWOPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_twopt_correlation_function.cpp,v 1.2 2011-07-07 18:30:04 copi Exp $");
+  ("$Id: calculate_twopt_correlation_function.cpp,v 1.3.2.1 2011-07-09 05:04:35 copi Exp $");
 }
 
 
 void usage (const char *progname)
 {
-  std::cerr << "Usage: " << progname << " <map fits file> <twopt tables prefix>\n";
+  std::cerr << "Usage: " << progname << " <map fits file> "
+            << "<twopt tables prefix>\n";
   exit (1);
 }
 
@@ -39,7 +39,8 @@ int main (int argc, char *argv[])
     std::ifstream in;
     while (true) {
       sstr.str("");
-      sstr << twopt_prefix << std::setw(5) << std::setfill('0') << Nbin << ".dat";
+      sstr << twopt_prefix << std::setw(5) << std::setfill('0') << Nbin
+           << ".dat";
       ++Nbin;
       in.open (sstr.str().c_str());
       if (! in) break;
@@ -58,7 +59,7 @@ int main (int argc, char *argv[])
     double C2, Csum;
     int p1, p2;
     Twopt_Table<int> twopt_table;
-#pragma omp for schedule(guided,Nbin/10)
+#pragma omp for schedule(guided)
     for (int k=0; k < Nbin; ++k) {
       std::cerr << k << std::endl;
       sstr.str("");
