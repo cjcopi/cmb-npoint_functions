@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2011-07-09 05:07:01 copi Exp $
+# $Id: Makefile,v 1.4 2011-07-09 21:24:53 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags`
@@ -8,6 +8,7 @@ DOXYGEN = doxygen
 
 USE_LIB_HEALPIX = create_twopt_table calculate_twopt_correlation_function
 USE_LIB_LZMA = create_twopt_table calculate_twopt_correlation_function
+USE_LIB_Z = create_twopt_table calculate_twopt_correlation_function
 
 override INCLUDES += -I.
 # Set to the appropriate flag for openmp compilation, for
@@ -37,6 +38,7 @@ clean-doc :
 $(USE_LIB_HEALPIX) : override LDFLAGS+=$(HEALPIX_LIBS)
 $(USE_LIB_HEALPIX) : override CPPFLAGS+=$(HEALPIX_INC)
 $(USE_LIB_LZMA) : override LDFLAGS+=-llzma
+$(USE_LIB_Z) : override LDFLAGS+=-lz
 
 # Individual target dependencies
 create_twopt_table : create_twopt_table.o

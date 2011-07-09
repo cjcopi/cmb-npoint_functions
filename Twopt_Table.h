@@ -6,12 +6,12 @@
 #include <fstream>
 #include <tr1/memory> // For std::tr1::shared_ptr
 
-#include <LZMA_Wrapper.h>
+#include <ZLIB_Wrapper.h>
 
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.6 2011-07-09 17:02:34 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.7 2011-07-09 21:24:53 copi Exp $");
   /// @endcond
 }
 
@@ -46,7 +46,7 @@ namespace {
  *  more CPU power/memory to decompress the data.
  */
 template<typename T>
-class Twopt_Table : private LZMA_Wrapper {
+class Twopt_Table : private ZLIB_Wrapper {
 private :
   // The write table has to be allowed to grow.
   std::vector<std::vector<T> > table_write;
@@ -75,7 +75,7 @@ private :
       }
     }
 
-    size_t Nbytes = Nelem * sizeof(T) / sizeof(uint8_t);
+    size_t Nbytes = Nelem * sizeof(T);
 
     return write_buffer (out, buf_full.get(), Nbytes);
   }
@@ -89,7 +89,7 @@ private :
     size_t Nelem = Nmax()*Npix();
     *buf = std::tr1::shared_ptr<T>(new T [Nelem]);
 
-    return read_buffer (in, buf->get(), Nelem*sizeof(T)/sizeof(uint8_t));
+    return read_buffer (in, buf->get(), Nelem*sizeof(T));
   }
 public :
   /** \name Constructors
