@@ -12,7 +12,7 @@
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.4.2.1 2011-07-09 05:04:35 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.5 2011-07-09 05:07:01 copi Exp $");
   /// @endcond
 }
 
@@ -31,9 +31,12 @@ namespace {
  *  number.  To get the pixel number use the appropriate entry from pixel_list().
  *
  *  Reading and writing two point tables are different processes and are
- *  internally treated differently.  You should not mix reading and writing
+ *  internally treated differently.  You cannot not mix reading and writing
  *  of tables.  The intention is to have one code create the tables and
- *  other codes use them.
+ *  other codes use them.  In fact, the write table is write only, its
+ *  values cannot be read and the read table is read only, its values canot
+ *  be written.  If you want to read the entries then write the table to
+ *  disk and read it back in.
  *
  *  Internally the table data is stored using liblzma for compression.  The
  *  user does not need to know this since the reading and writing routines
@@ -56,8 +59,6 @@ private :
 
   // LZMA compression options
   static const int compression_level = 6; // 0 to 9
-  // Chunk size in bytes to use for compression and decompression
-  //static const size_t compression_chunk = 1024*1024;
   /** Write the output table to the stream with compression.
    *  The table and nmax MUST be set correctly before calling.
    */
@@ -270,21 +271,17 @@ public :
     }
     in.read (reinterpret_cast<char*>(&nmax), sizeof(nmax));
     read_table_from_stream (in, &table_read);
-#if 0
-    if (nmax != nmax_old)
-      table_read = std::tr1::shared_ptr<T>(new T [Npix*nmax]);
-    in.read (reinterpret_cast<char*>(table_read.get()), Npix*nmax*sizeof(T));
-#endif
 
     in.close();
     return true;
   }
 
   /** Reset the two point table.
-   *  This ONLY clears the table.  The pixel list and bin value are
+   *  This ONLY clears the write table.  The pixel list and bin value are
    *  unchanged.  This is useful to call after writing a table with
    *  write_file() to prepare for filling in another bin in the two point
-   *  table.
+   *  table.  There is no need to clear the read table; it will be cleared
+   *  when a new file is read.
    */
   inline void reset()
   { for (size_t p=0; p < table_write.size(); ++p) table_write[p].clear(); }
@@ -301,17 +298,15 @@ public :
   inline size_t Npix() const { return pixlist.size(); }
   /// The maximum number of values in each row of the table.
   inline size_t Nmax() const { return nmax; }
-  /// Value from the two point write table.
-  inline T& get_write_value (T i, T j)
-  { return table_write[i][j]; }
   /** Value from the two point read table.
-   *  This value cannot be changed.
+   *  This value cannot be changed.  The value from the write table CANNOT
+   *  be accessed.  If the read table isn't initialized expect problems!
    */
-  inline const T& get_read_value (T i, T j) const
+  inline T operator() (T i, T j) const
   { return table_read.get()[i*Nmax()+j]; }
   //@}
 
-  /// Assign the value of the left edge of the bin.
+  /// Assign the value of the bin.
   inline void bin_value (double bv) { cosbin=bv; }
   /// Assign the list of pixels.
   inline void pixel_list (const std::vector<T>& pl) 

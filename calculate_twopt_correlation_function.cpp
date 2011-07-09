@@ -10,7 +10,7 @@
 
 namespace {
   const std::string CALCULATE_TWOPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_twopt_correlation_function.cpp,v 1.3.2.1 2011-07-09 05:04:35 copi Exp $");
+  ("$Id: calculate_twopt_correlation_function.cpp,v 1.4 2011-07-09 05:07:01 copi Exp $");
 }
 
 
@@ -72,9 +72,9 @@ int main (int argc, char *argv[])
 	p1 = twopt_table.pixel_list()[i];
 	for (size_t j=0;
 	     ((j < twopt_table.Nmax())
-	      && (twopt_table.get_read_value(i,j) != -1));
+	      && (twopt_table(i,j) != -1));
 	     ++j) {
-	  p2 = twopt_table.pixel_list()[twopt_table.get_read_value(i,j)];
+	  p2 = twopt_table.pixel_list()[twopt_table(i,j)];
 	  if (p1 > p2) continue; // Avoid double counting.
 	  ++Npair;
 	  Csum += map[p2];
