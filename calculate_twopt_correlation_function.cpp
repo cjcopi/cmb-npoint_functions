@@ -10,7 +10,7 @@
 
 namespace {
   const std::string CALCULATE_TWOPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_twopt_correlation_function.cpp,v 1.4 2011-07-09 05:07:01 copi Exp $");
+  ("$Id: calculate_twopt_correlation_function.cpp,v 1.5 2011-07-09 17:02:35 copi Exp $");
 }
 
 
@@ -61,7 +61,6 @@ int main (int argc, char *argv[])
     Twopt_Table<int> twopt_table;
 #pragma omp for schedule(guided)
     for (int k=0; k < Nbin; ++k) {
-      std::cerr << k << std::endl;
       sstr.str("");
       sstr << twopt_prefix << std::setw(5) << std::setfill('0') << k << ".dat";
       twopt_table.read_file (sstr.str());
