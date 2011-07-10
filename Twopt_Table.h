@@ -6,12 +6,16 @@
 #include <fstream>
 #include <tr1/memory> // For std::tr1::shared_ptr
 
-#include <ZLIB_Wrapper.h>
+#ifdef USE_LZMA_COMPRESSION
+#  include <LZMA_Wrapper.h>
+#else
+#  include <ZLIB_Wrapper.h>
+#endif
 
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.7 2011-07-09 21:24:53 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.8 2011-07-09 22:23:45 copi Exp $");
   /// @endcond
 }
 
@@ -37,16 +41,28 @@ namespace {
  *  be written.  If you want to read the entries then write the table to
  *  disk and read it back in.
  *
- *  Internally the table data is stored using liblzma for compression.  The
- *  user does not need to know this since the reading and writing routines
- *  handle it transparently.  However this does mean the files are much
- *  smaller than they would be otherwise.  Also this trades off significant
- *  file io latency for uncompressed files (by far the slowest part of
- *  calculating a two point correlation function) with the necessity for
- *  more CPU power/memory to decompress the data.
+ *  Internally the table data is stored using compression.  The user does
+ *  not need to know this since the reading and writing routines handle it
+ *  transparently.  However this does mean the files are much smaller than
+ *  they would be otherwise.  Also this trades off significant file io
+ *  latency for uncompressed files (by far the slowest part of calculating
+ *  a two point correlation function) with the necessity for more CPU
+ *  power/memory to decompress the data.
+ *
+ *  By default zlib is used for compression.  This can be changed to LZMA
+ *  by defining USE_LZMA_COMPRESSION when compiling.  In one test at
+ *  NSIDE=128 it was found that zlib is about 5 times faster at creating
+ *  tables and slightly faster in calculating the two point correlation
+ *  function (so win-win), hence its choice as the default.
  */
 template<typename T>
-class Twopt_Table : private ZLIB_Wrapper {
+class Twopt_Table : private
+#ifdef USE_LZMA_COMPRESSION
+LZMA_Wrapper
+#else
+ ZLIB_Wrapper
+#endif
+{
 private :
   // The write table has to be allowed to grow.
   std::vector<std::vector<T> > table_write;
@@ -56,8 +72,6 @@ private :
   double cosbin;
   size_t nmax;
 
-  // LZMA compression options
-  static const int compression_level = 6; // 0 to 9
   /** Write the output table to the stream with compression.
    *  The table and nmax MUST be set correctly before calling.
    */

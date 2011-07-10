@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string LZMA_WRAPPER_RCSID
-  ("$Id: Twopt_Table.h,v 1.6 2011-07-09 17:02:34 copi Exp $");
+  ("$Id: LZMA_Wrapper.h,v 1.1 2011-07-09 21:24:53 copi Exp $");
   /// @endcond
 }
 
@@ -19,6 +19,10 @@ namespace {
  *  data to a stream with compression.  This allows easy replacement of the
  *  compression routines by writting a wrapper with the same interface that
  *  uses a different compression library.
+ *
+ *  Lzma produces smaller files zlib but is much slower.  This wrapper can
+ *  be used as a drop-in replacement for ZLIB_Wrapper if smaller files are
+ *  very important.
  */
 class LZMA_Wrapper {
 private :
