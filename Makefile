@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.5 2011-07-09 22:23:45 copi Exp $
+# $Id: Makefile,v 1.6 2011-07-10 01:16:37 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags`
@@ -7,10 +7,17 @@ HEALPIX_LIBS=`healpix-config --cpplibs`
 DOXYGEN = doxygen
 
 DEFINES=
+override INCLUDES += -I.
+# Set to the appropriate flag for openmp compilation, for
+# g++ this is -fopenmp.  See OPENMP_DEFAULT for targets that use this.
+OPENMP=-fopenmp
 
+OPTIMIZE = -O3 -ffast-math -fomit-frame-pointer
+
+# Special handling of targets
 USE_LIB_HEALPIX = create_twopt_table calculate_twopt_correlation_function
 ifdef USE_LZMA_COMPRESSION
-	override DEFINES+= -DUSE_LZMA_COMPRESSION
+	override DEFINES+=-DUSE_LZMA_COMPRESSION
 	USE_LIB_LZMA = create_twopt_table \
 		calculate_twopt_correlation_function
 	USE_LIB_Z=
@@ -18,17 +25,18 @@ else
 	USE_LIB_Z = create_twopt_table calculate_twopt_correlation_function
 	USE_LIB_LZMA=
 endif
-
-override INCLUDES += -I.
-# Set to the appropriate flag for openmp compilation, for
-# g++ this is -fopenmp
-OPENMP =
-
-OPTIMIZE = -O3 -ffast-math -fomit-frame-pointer
-CPPFLAGS = $(INCLUDES) $(OPTIMIZE) $(OPENMP) $(DEFINES)
+# Targets that are built with openmp by default.  To turn this off for a
+# compilation invoke make as
+# make target OPENMP=
+OPENMP_DEFAULT = create_twopt_table calculate_twopt_correlation_function
+# Targets that don't need anything special.
+EXTRA_TARGETS =
 
 # Sort also removes duplicates which is what we really want.
-ALL_TARGETS=$(sort $(USE_LIB_HEALPIX) $(USE_LIB_LZMA) )
+ALL_TARGETS=$(sort $(USE_LIB_HEALPIX) $(USE_LIB_LZMA) \
+                   $(OPENMP_DEFAULT) $(EXTRA_TARGETS) )
+
+CPPFLAGS = $(INCLUDES) $(OPTIMIZE) $(DEFINES)
 
 all :
 	@echo Available targets: $(ALL_TARGETS)
@@ -56,6 +64,7 @@ $(USE_LIB_HEALPIX) : override LDFLAGS+=$(HEALPIX_LIBS)
 $(USE_LIB_HEALPIX) : override CPPFLAGS+=$(HEALPIX_INC)
 $(USE_LIB_LZMA) : override LDFLAGS+=-llzma
 $(USE_LIB_Z) : override LDFLAGS+=-lz
+$(OPENMP_DEFAULT) : override CPPFLAGS+=$(OPENMP)
 
 # Individual target dependencies
 create_twopt_table : create_twopt_table.o
