@@ -19,7 +19,7 @@
 
 namespace {
   const std::string CREATE_TWOPT_TABLE_RCSID
-  ("$Id: create_twopt_table.cpp,v 1.5.2.1 2011-07-09 05:04:35 copi Exp $");
+  ("$Id: create_twopt_table.cpp,v 1.6 2011-07-09 05:07:01 copi Exp $");
 }
 
 void dtheta_to_cosbin (double dtheta, std::vector<double>& cosbin)
@@ -153,7 +153,6 @@ int main (int argc, char *argv[])
   }
 
   std::vector<buffered_pair_binary_file<int> > binfiles;
-#ifndef USE_TEMPFILES
   {
     std::ostringstream fstr;
     for (int k=0; k < Nbin; ++k) {
@@ -165,13 +164,16 @@ int main (int argc, char *argv[])
   }
   
   std::cout << "Creating temporary files.\n";
-  // Now create values and write to temporary files the files.
+  /* Now create values and write to temporary files the files.
+   * This could be parallelized but not easily.  We use the order we step
+   * through the  pixels to ensure that the tables we create below are
+   * sorted withouthaving to actually run a sorting algorithm on them.
+   */
   vec3_t<double> v0, v1;
   int ibin = 0;
   double dp;
   int dir;
   for (size_t i=0; i < Npix; ++i) {
-    if (i%10000==0) std::cout << i << std::endl;
     for (size_t j=i+1; j < Npix; ++j) {
       dp = dotprod (veclist[i], veclist[j]);
       dp = std::max (dp, -1.0);
@@ -180,7 +182,10 @@ int main (int argc, char *argv[])
       else dir = -1;
       /* Find the bin.  Since we use the NEST scheme a simple linear search
        *  is efficient; sequential pixels are near each other so it should
-       *  be a short walk between pixel pairs.
+       *  be a short walk between pixel pairs.  This is only true if the
+       *  pixel list is sorted.  If the pixel list is randomized then this
+       * won't be efficient.  Even so, the number of bins is expected to be
+       * small so a more sophisticated algorithm isn't warranted.
        *
        *  We do NOT require the bin list to be inclusive, ie start at -1
        *  (or smaller) and end at 1 (or larger).  If a value is "off the
@@ -198,15 +203,8 @@ int main (int argc, char *argv[])
    */
   binfiles.clear();
   std::cout << "Temporary files created.\n";
-#endif
 
-  /* Now create the 2 point tables.  For each table these are 2 dim arrays
-   * of size Npix x ?, indexed as (p,?) where p is the pixel at the center.
-   * The entries in the table are the pixels paired with p that are in the
-   * given bin. Note that this table may not be completely full if the bins
-   * are small compared to Nside. */
-  std::cout << "Creating two point tables.\n";
-
+  // Now create the 2 point tables.   This can trivially be parallelized.
 #pragma omp parallel shared(binfiles, Nbin, Npix, pixel_list, bin_list, \
   tmpfile_prefix, twoptfile_prefix)
   {
