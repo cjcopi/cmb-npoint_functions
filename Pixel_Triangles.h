@@ -7,20 +7,21 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Twopt_Table.h,v 1.9 2011-07-10 01:16:37 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.1 2011-07-11 20:45:06 copi Exp $");
   /// @endcond
 }
 
 /** Storage for pixel triangles.
  *  All possible triangles are stored, including cyclic permutations of
  *  triangle with the same side lengths.  See Pixel_Triangles_Isosceles or
- *  Pixel_Triangle_Equilateral for specialized versions.
+ *  Pixel_Triangles_Equilateral for specialized versions.
  */
 template<typename T>
 class Pixel_Triangles {
 private :
   std::vector<std::vector<T> > triangles;
 protected :
+  /** Find matches in two lists and append them to a new list. */
   void append_matches (const T *L1, size_t NL1, const T *L2, size_t NL2,
 		       std::vector<T>& res)
   {
@@ -107,7 +108,7 @@ public :
   /// Number of triangles in the list.
   inline size_t size() const
   { return triangles.size(); }
-  /** The three values demarking the points of the triangle.
+  /** The three pixels that are the corners of the requested triangle.
    *  This value cannot (should not) be changed.
    */
   inline const std::vector<T>& operator() (size_t j) const
@@ -120,11 +121,16 @@ public :
  *  Only the unique triangles are stored.  The angular distance between
  *  pixel pairs 1,2 and 1,3 are equal.  The angular distance between pixel
  *  pair 2,3 is different than the other two pairs.  Pixel 2 is always less
- *  than pixel 3 (these two pixels are interchangeable.
+ *  than pixel 3 (these two pixels are interchangeable).
+ *
+ *  This is a specialized version of Pixel_Triangles.
  */
 template<typename T>
 class Pixel_Triangles_Isosceles : public Pixel_Triangles<T> {
 protected :
+  /** Find matches in two lists and append them to a new list.
+   *  Here the minimum allowed value is provided.  All values appended to the
+   *  list will be greater than or equal to this value. */
   void append_matches (T minval, const T *L1, size_t NL1,
 		       const T *L2, size_t NL2,
 		       std::vector<T>& res)
@@ -197,6 +203,8 @@ public :
 /** Storage for equilateral pixel triangles.
  *  Only the unique triangles are stored.  The pixels are stored in
  *  monotonically increasing order.
+ *
+ *  This is a specialized version of Pixel_Triangles_Isosceles.
  */
 template<typename T>
 class Pixel_Triangles_Equilateral : public Pixel_Triangles_Isosceles<T> {
