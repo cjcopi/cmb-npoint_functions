@@ -1,8 +1,8 @@
-"""Calculate the abscissas and weights needed for Legendre-Gauss
-quadrature.  These routines are not optimized but work fast enough for l ~
-500 that I am not worried about speeding them up."""
+"""Python code to calculate the abscissas and weights needed for
+Legendre-Gauss quadrature.  These routines are not optimized but work fast
+enough for l ~ 500 that I am not worried about speeding them up."""
 
-# $Id: legendre_gauss.py,v 1.1 2011-07-08 05:50:24 copi Exp $
+# $Id: legendre_gauss.py,v 1.2 2011-07-08 05:54:57 copi Exp $
 
 import scipy.special as sf
 import scipy.optimize as opt
@@ -17,11 +17,11 @@ def Pl_func (x, l) :
     (pl, dpl) = sf.lpn (l, x)
     return pl[l]
 
-def Pl_zeros (l, tol=1.0e-12) :
-    """Return the positive zeros of P_l(cos theta).  The values of
-    cos(theta) are returned.  Since the P_l are (anti)symmetric for l (odd)
-    even all the zeros can easily be determined from this list.  For l odd
-    cos(theta)=0 is a zero and is included in the list."""
+def abscissas (l, tol=1.0e-12) :
+    """Return the abscissas, the positive zeros of P_l(cos theta).  The
+    values of cos(theta) are returned.  Since the P_l are (anti)symmetric
+    for l (odd) even all the zeros can easily be determined from this list.
+    For l odd cos(theta)=0 is a zero and is included in the list."""
     Lmax = int((l + 1) / 2)
     Plzero = np.zeros(Lmax)
     for j in range (Lmax) :
@@ -35,7 +35,7 @@ def Pl_zeros (l, tol=1.0e-12) :
 
 def weights (l, Plzeros) :
     """Return the weights for Legendre-Gauss quadrature.  The zeros should
-    be calculated using Pl_zeros.  For even l: 2*weights.sum() == 2;  for
+    be calculated using abscissas().  For even l: 2*weights.sum() == 2; for
     odd l: 2*weights.sum() - weights[0] == 2; since +/- of the zeros
     provided are zeros."""
     w = np.zeros(Plzeros.size)
@@ -43,16 +43,16 @@ def weights (l, Plzeros) :
         w[j] = 2 * (1-Plzeros[j]**2) / ((l+1)*Pl_func(Plzeros[j], l+1))**2
     return w
 
-def abscissa_weights (l, tol=1.0e-12) :
+def abscissas_weights (l, tol=1.0e-12) :
     """Return a tuple containing the abscissas (zeros of the Legendre
     polynomial of order l) and the weights for Legendre-Gauss quadrature.
-    See Pl_zeros() and weights() for more details.
+    See abscissas() and weights() for more details.
     
     This routine returns the FULL list of zeros and weights, that is, the
     zeros at positive and negative arguments to the Legendre polynomial
-    unlink Pl_zeros() and weights().
+    unlike abscissas() and weights().
     """
-    z = Pl_zeros (l, tol)
+    z = abscissas (l, tol)
     w = weights (l, z)
     if l%2 == 0 : # Even
     	Z = np.r_ [ -z[::-1], z ]
