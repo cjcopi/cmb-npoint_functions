@@ -15,7 +15,7 @@
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.8 2011-07-09 22:23:45 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.9 2011-07-10 01:16:37 copi Exp $");
   /// @endcond
 }
 
@@ -225,7 +225,7 @@ public :
    *  This value cannot be changed.  The value from the write table CANNOT
    *  be accessed.  If the read table isn't initialized expect problems!
    */
-  inline T operator() (T i, T j) const
+  inline const T& operator() (T i, T j) const
   { return table_read.get()[i*Nmax()+j]; }
   //@}
 
