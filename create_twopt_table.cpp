@@ -19,7 +19,7 @@
 
 namespace {
   const std::string CREATE_TWOPT_TABLE_RCSID
-  ("$Id: create_twopt_table.cpp,v 1.6 2011-07-09 05:07:01 copi Exp $");
+  ("$Id: create_twopt_table.cpp,v 1.7 2011-07-10 02:51:23 copi Exp $");
 }
 
 void dtheta_to_cosbin (double dtheta, std::vector<double>& cosbin)
@@ -181,16 +181,16 @@ int main (int argc, char *argv[])
       if (dp > bin_list[ibin]) dir = +1;
       else dir = -1;
       /* Find the bin.  Since we use the NEST scheme a simple linear search
-       *  is efficient; sequential pixels are near each other so it should
-       *  be a short walk between pixel pairs.  This is only true if the
-       *  pixel list is sorted.  If the pixel list is randomized then this
+       * is efficient; sequential pixels are near each other so it should
+       * be a short walk between pixel pairs.  This is only true if the
+       * pixel list is sorted.  If the pixel list is randomized then this
        * won't be efficient.  Even so, the number of bins is expected to be
        * small so a more sophisticated algorithm isn't warranted.
        *
-       *  We do NOT require the bin list to be inclusive, ie start at -1
-       *  (or smaller) and end at 1 (or larger).  If a value is "off the
-       *  end" of the list we stick the value in the first or last bin, as
-       *  appropriate.
+       * We do NOT require the bin list to be inclusive, ie start at -1 (or
+       * smaller) and end at 1 (or larger).  If a value is "off the end" of
+       * the list we stick the value in the first or last bin, as
+       * appropriate.
        */
       while ( (((ibin != 0) && (dir < 0)) || ((ibin != Nbin-1) && (dir > 0)))
 	      && ((dp < bin_list[ibin]) || (dp > bin_list[ibin+1])))
