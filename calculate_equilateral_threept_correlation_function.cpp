@@ -11,7 +11,7 @@
 
 namespace {
   const std::string CALCULATE_EQUILATERAL_THREEPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_twopt_correlation_function.cpp,v 1.6 2011-07-10 02:43:47 copi Exp $");
+  ("$Id: calculate_equilateral_threept_correlation_function.cpp,v 1.1 2011-07-12 01:44:17 copi Exp $");
 }
 
 
@@ -65,13 +65,17 @@ int main (int argc, char *argv[])
       sstr.str("");
       sstr << twopt_prefix << std::setw(5) << std::setfill('0') << k << ".dat";
       twopt_table.read_file (sstr.str());
+      if (map.Npix() < twopt_table.Npix()) {
+      	std::cerr << "Map does not have enough pixels.\n";
+	std::exit(1);
+      }
       triangles.find_triangles (twopt_table);
       C3 = 0;
       for (size_t j=0; j < triangles.size(); ++j) {
 	C3 += map[triangles(j)[0]] * map[triangles(j)[1]]
-	  * map[triangles(j)[2]] ;
+	  * map[triangles(j)[2]];
       }
-      C3 /= triangles.size();
+      if (triangles.size() != 0) C3 /= triangles.size();
       bin_list[k] = twopt_table.bin_value();
       Corr[k] = C3;
     }
