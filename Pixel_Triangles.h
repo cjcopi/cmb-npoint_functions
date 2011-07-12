@@ -7,7 +7,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.1 2011-07-11 20:45:06 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.2 2011-07-11 21:48:25 copi Exp $");
   /// @endcond
 }
 
@@ -15,6 +15,9 @@ namespace {
  *  All possible triangles are stored, including cyclic permutations of
  *  triangle with the same side lengths.  See Pixel_Triangles_Isosceles or
  *  Pixel_Triangles_Equilateral for specialized versions.
+ *
+ *  The actual pixel values are stored, not the indices to the pixel list
+ *  as is done in the two point table.
  */
 template<typename T>
 class Pixel_Triangles {
@@ -47,11 +50,8 @@ protected :
       }
     }
   }
-public :
-  /// Generic constructor.
-  Pixel_Triangles () : triangles() {}
 
-  /// Add a triangle
+  /// Add a triangle to the list.
   inline void add (const T& p1, const T& p2, const T& p3)
   {
     size_t n = triangles.size();
@@ -60,6 +60,9 @@ public :
     triangles[n][1] = p2;
     triangles[n][2] = p3;
   }
+public :
+  /// Generic constructor.
+  Pixel_Triangles () : triangles() {}
 
   /** Reset the list of triangles.
    *  All triangles are erased.
@@ -78,10 +81,10 @@ public :
 		       const Twopt_Table<T>& t2,
 		       const Twopt_Table<T>& t3)
   {
-    T p1, p2, p3;
+    T p1, p2;
     T i1, i2;
     std::vector<T> trip;
-    size_t ntriplets=0; // Keep track of triplets, just for convenience
+    this->reset();
 
     for (size_t j1=0; j1 < t1.Npix(); ++j1) {
       i1 = j1; // to make the code look symmetric
@@ -176,10 +179,10 @@ public :
   void find_triangles (const Twopt_Table<T>& t1,
 		       const Twopt_Table<T>& t2)
   {
-    T p1, p2, p3;
+    T p1, p2;
     T i1, i2;
     std::vector<T> trip;
-    size_t ntriplets=0; // Keep track of triplets, just for convenience
+    this->reset();
 
     for (size_t j1=0; j1 < t1.Npix(); ++j1) {
       i1 = j1; // to make the code look symmetric
@@ -219,10 +222,10 @@ public :
    */
   void find_triangles (const Twopt_Table<T>& t)
   {
-    T p1, p2, p3;
+    T p1, p2;
     T i1, i2;
     std::vector<T> trip;
-    size_t ntriplets=0; // Keep track of triplets, just for convenience
+    this->reset();
 
     for (size_t j1=0; j1 < t.Npix(); ++j1) {
       i1 = j1; // to make the code look symmetric

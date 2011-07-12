@@ -15,7 +15,7 @@
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.9 2011-07-10 01:16:37 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.10 2011-07-11 21:48:05 copi Exp $");
   /// @endcond
 }
 
@@ -179,7 +179,6 @@ public :
 		      std::fstream::in | std::fstream::binary);
     if (! in) return false;
 
-    int nmax_old = nmax;
     // First header
     in.read (&version, sizeof(version));
     if (version != 1) {
