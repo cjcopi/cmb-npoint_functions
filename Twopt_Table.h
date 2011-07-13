@@ -15,7 +15,7 @@
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.11 2011-07-12 00:33:41 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.12 2011-07-13 01:08:42 copi Exp $");
   /// @endcond
 }
 
@@ -105,6 +105,28 @@ private :
 
     return read_buffer (in, buf->get(), Nelem*sizeof(T));
   }
+
+  /** Read the header from the file.
+   */
+  bool read_header_from_stream (std::ifstream& in, char& version)
+  {
+    size_t Npix;
+
+    // First version
+    in.read (&version, sizeof(version));
+    if (version != 1) {
+      std::cerr << "Twopt_Table only supports file format version 1\n";
+      return false;
+    }
+    in.read (reinterpret_cast<char*>(&cosbin), sizeof(cosbin));
+    in.read (reinterpret_cast<char*>(&Npix), sizeof(Npix));
+    pixlist.resize(Npix);
+    for (size_t p=0; p < Npix; ++p) {
+      in.read (reinterpret_cast<char*>(&pixlist[p]), sizeof(T));
+    }
+    in.read (reinterpret_cast<char*>(&nmax), sizeof(nmax));
+    return true;
+  }
 public :
   /** \name Constructors
    *  Construct a two point table.
@@ -174,28 +196,22 @@ public :
   bool read_file (const std::string& filename)
   {
     char version;
-    size_t Npix;
+    bool status;
+
     std::ifstream in (filename.c_str(),
 		      std::fstream::in | std::fstream::binary);
     if (! in) return false;
 
-    // First header
-    in.read (&version, sizeof(version));
-    if (version != 1) {
-      std::cerr << "Twopt_Table only supports file format version 1\n";
-      return false;
+    // First the header
+    status = read_header_from_stream (in, version);
+
+    // Then the table
+    if (status) {
+      status = read_table_from_stream (in, &table_read);
     }
-    in.read (reinterpret_cast<char*>(&cosbin), sizeof(cosbin));
-    in.read (reinterpret_cast<char*>(&Npix), sizeof(Npix));
-    pixlist.resize(Npix);
-    for (size_t p=0; p < Npix; ++p) {
-      in.read (reinterpret_cast<char*>(&pixlist[p]), sizeof(T));
-    }
-    in.read (reinterpret_cast<char*>(&nmax), sizeof(nmax));
-    read_table_from_stream (in, &table_read);
 
     in.close();
-    return true;
+    return status;
   }
 
   /** Read the table header from a binary file.
@@ -205,30 +221,19 @@ public :
    *  At present version 1 of the file format is supported.  See
    *  write_file() for details. 
    */
-  // read_file() should use this ....
   bool read_file_header (const std::string& filename)
   {
     char version;
-    size_t Npix;
+    bool status;
+
     std::ifstream in (filename.c_str(),
 		      std::fstream::in | std::fstream::binary);
     if (! in) return false;
 
-    // First header
-    in.read (&version, sizeof(version));
-    if (version != 1) {
-      std::cerr << "Twopt_Table only supports file format version 1\n";
-      return false;
-    }
-    in.read (reinterpret_cast<char*>(&cosbin), sizeof(cosbin));
-    in.read (reinterpret_cast<char*>(&Npix), sizeof(Npix));
-    pixlist.resize(Npix);
-    for (size_t p=0; p < Npix; ++p) {
-      in.read (reinterpret_cast<char*>(&pixlist[p]), sizeof(T));
-    }
-    in.read (reinterpret_cast<char*>(&nmax), sizeof(nmax));
+    status = read_header_from_stream (in, version);
+
     in.close();
-    return true;
+    return status;
   }
 
   /** Reset the two point table.
