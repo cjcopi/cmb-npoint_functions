@@ -17,9 +17,29 @@
 #include <buffered_pair_binary_file.h>
 #include <myRange.h>
 
+// Documentation read by doxygen for the front page of the project.
+
+/** \mainpage Npoint Functions
+ *
+ *  The most common npoint function calculated for use in the CMB and
+ *  elsewhere is the two point function, also known as the correlation
+ *  function, \f$C(\theta)\f$.  This function can be quickly calculated in
+ *  a number of ways, in particular using PolSpice.  Higher point functions
+ *  cannot efficiently be calculated using such clever techniques.
+ *
+ *  A pixel based method has been described by Eriksen, H.K., Lilje, P.B.,
+ *  Banday, A.J, and Gorski, K.M., "Estimating N-point correlation
+ *  functions from pixelized sky maps", ApJS, 151, 1 (2004).  The code
+ *  presented here is an independent implementation of the basic idea with
+ *  some of the optimizations presented in their paper.  Some other
+ *  optimizations have also been included (such as compressing the two
+ *  point tables and using temporary files when first calculating the two
+ *  point tables).  The added optimizations allow for larger number of
+ *  pixels to be employed.
+ */
 namespace {
   const std::string CREATE_TWOPT_TABLE_RCSID
-  ("$Id: create_twopt_table.cpp,v 1.7 2011-07-10 02:51:23 copi Exp $");
+  ("$Id: create_twopt_table.cpp,v 1.8 2011-07-11 18:14:58 copi Exp $");
 }
 
 void dtheta_to_cosbin (double dtheta, std::vector<double>& cosbin)
