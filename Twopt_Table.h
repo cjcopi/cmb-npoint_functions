@@ -15,7 +15,7 @@
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.10 2011-07-11 21:48:05 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.11 2011-07-12 00:33:41 copi Exp $");
   /// @endcond
 }
 
@@ -194,6 +194,39 @@ public :
     in.read (reinterpret_cast<char*>(&nmax), sizeof(nmax));
     read_table_from_stream (in, &table_read);
 
+    in.close();
+    return true;
+  }
+
+  /** Read the table header from a binary file.
+   *  Only the header is read, not the table.  This is useful for getting
+   *  information about the two point tables, such as the pixels in them,
+   *  the bin value, without having to read and decompress the whole file.
+   *  At present version 1 of the file format is supported.  See
+   *  write_file() for details. 
+   */
+  // read_file() should use this ....
+  bool read_file_header (const std::string& filename)
+  {
+    char version;
+    size_t Npix;
+    std::ifstream in (filename.c_str(),
+		      std::fstream::in | std::fstream::binary);
+    if (! in) return false;
+
+    // First header
+    in.read (&version, sizeof(version));
+    if (version != 1) {
+      std::cerr << "Twopt_Table only supports file format version 1\n";
+      return false;
+    }
+    in.read (reinterpret_cast<char*>(&cosbin), sizeof(cosbin));
+    in.read (reinterpret_cast<char*>(&Npix), sizeof(Npix));
+    pixlist.resize(Npix);
+    for (size_t p=0; p < Npix; ++p) {
+      in.read (reinterpret_cast<char*>(&pixlist[p]), sizeof(T));
+    }
+    in.read (reinterpret_cast<char*>(&nmax), sizeof(nmax));
     in.close();
     return true;
   }
