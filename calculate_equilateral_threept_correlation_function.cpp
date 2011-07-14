@@ -11,7 +11,7 @@
 
 namespace {
   const std::string CALCULATE_EQUILATERAL_THREEPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_equilateral_threept_correlation_function.cpp,v 1.2 2011-07-12 03:46:41 copi Exp $");
+  ("$Id: calculate_equilateral_threept_correlation_function.cpp,v 1.3 2011-07-14 17:34:14 copi Exp $");
 }
 
 
@@ -65,7 +65,8 @@ int main (int argc, char *argv[])
       sstr.str("");
       sstr << twopt_prefix << std::setw(5) << std::setfill('0') << k << ".dat";
       twopt_table.read_file (sstr.str());
-      if (map.Npix() < twopt_table.Npix()) {
+      // Cast to quiet the compiler about the signed/unsigned comparison.
+      if ((size_t)map.Npix() < twopt_table.Npix()) {
       	std::cerr << "Map does not have enough pixels.\n";
 	std::exit(1);
       }
