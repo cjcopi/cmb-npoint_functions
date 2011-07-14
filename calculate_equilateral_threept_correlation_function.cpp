@@ -11,7 +11,7 @@
 
 namespace {
   const std::string CALCULATE_EQUILATERAL_THREEPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_equilateral_threept_correlation_function.cpp,v 1.1 2011-07-12 01:44:17 copi Exp $");
+  ("$Id: calculate_equilateral_threept_correlation_function.cpp,v 1.2 2011-07-12 03:46:41 copi Exp $");
 }
 
 
@@ -76,7 +76,7 @@ int main (int argc, char *argv[])
 	  * map[triangles(j)[2]];
       }
       if (triangles.size() != 0) C3 /= triangles.size();
-      bin_list[k] = twopt_table.bin_value();
+      bin_list[k] = triangles.lengths()[0];
       Corr[k] = C3;
     }
   }

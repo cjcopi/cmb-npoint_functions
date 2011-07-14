@@ -7,7 +7,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.2 2011-07-11 21:48:25 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.3 2011-07-12 00:33:41 copi Exp $");
   /// @endcond
 }
 
@@ -23,6 +23,7 @@ template<typename T>
 class Pixel_Triangles {
 private :
   std::vector<std::vector<T> > triangles;
+  std::vector<double> edge_length;
 protected :
   /** Find matches in two lists and append them to a new list. */
   void append_matches (const T *L1, size_t NL1, const T *L2, size_t NL2,
@@ -60,9 +61,18 @@ protected :
     triangles[n][1] = p2;
     triangles[n][2] = p3;
   }
+
+  /// Set the edge lengths of the triangle
+  inline void set_edge_lengths (double l1, double l2, double l3)
+  {
+    this->edge_length[0] = l1;
+    this->edge_length[1] = l2;
+    this->edge_length[2] = l3;
+  }
+
 public :
   /// Generic constructor.
-  Pixel_Triangles () : triangles() {}
+  Pixel_Triangles () : triangles(), edge_length(3) {}
 
   /** Reset the list of triangles.
    *  All triangles are erased.
@@ -85,6 +95,7 @@ public :
     T i1, i2;
     std::vector<T> trip;
     this->reset();
+    set_edge_lengths (t1.bin_value(), t2.bin_value(), t3.bin_value());
 
     for (size_t j1=0; j1 < t1.Npix(); ++j1) {
       i1 = j1; // to make the code look symmetric
@@ -116,6 +127,14 @@ public :
    */
   inline const std::vector<T>& operator() (size_t j) const
   { return triangles[j]; }
+  /** The edge lengths of the triangles.
+   *  The edge lengths are the dot products between the vectors to the
+   *  points of the triangle in the order
+   * \f[ \left\{ \hat n_1\cdot\hat n_2, \quad \hat n_2\cdot\hat n_3, \quad \hat
+   *     n_3\cdot\hat n_1 \right\}. \f]
+   */
+  inline const std::vector<double>& lengths() const
+  { return edge_length; }
   //@}
 };
 
@@ -139,9 +158,6 @@ protected :
 		       std::vector<T>& res)
   {
     const T *it1, *it2; // "iterators"
-    // For some reason this can fail?  Is it because of the -1 padding?
-    //it1 = std::lower_bound (&L1[0], &L1[NL1], minval);
-    //it2 = std::lower_bound (&L2[0], &L2[NL2], minval);
     it1 = L1;
     while ((it1 != &L1[NL1]) && (*it1 < minval)) ++it1;
     it2 = L2;
@@ -183,6 +199,7 @@ public :
     T i1, i2;
     std::vector<T> trip;
     this->reset();
+    set_edge_lengths (t1.bin_value(), t2.bin_value(), t1.bin_value());
 
     for (size_t j1=0; j1 < t1.Npix(); ++j1) {
       i1 = j1; // to make the code look symmetric
@@ -226,6 +243,7 @@ public :
     T i1, i2;
     std::vector<T> trip;
     this->reset();
+    set_edge_lengths (t.bin_value(), t.bin_value(), t.bin_value());
 
     for (size_t j1=0; j1 < t.Npix(); ++j1) {
       i1 = j1; // to make the code look symmetric
@@ -246,6 +264,37 @@ public :
     }
   }
 };
+
+/** Determine the orientation of triangles.
+ *  Sets a list of orientations in the same order as the list of
+ *  triangles.  The value set is +1 for righthanded and -1 for lefthanded
+ *  triangles.  Righthanded triangles are defined to have
+ *  \f[ (\hat n_1\times\hat n_2)\cdot \hat n_3 > 0. \f]
+ *
+ * \relates Pixel_Triangles
+ */
+#include <healpix_base.h>
+#include <vec3.h>
+template<typename T>
+void get_orientation (int Nside, const Pixel_Triangles<T>& pt,
+		      std::vector<int>& orient)
+{
+  Healpix_Base HBase (Nside, NEST, SET_NSIDE);
+  // Create list of vectors.
+  size_t Npix = 12*Nside*Nside;
+  std::vector<vec3> v (Npix);
+  for (size_t i=0; i < Npix; ++i) {
+    v[i] = HBase.pix2vec (i);
+  }
+  
+  // Loop over triangles and determine their orientations
+  orient.assign (pt.size(), 1); // All assumed to be righthanded
+  for (size_t j=0; j < pt.size(); ++j) {
+    if (dotprod (crossprod (v[pt(j)[0]], v[pt(j)[1]]), v[pt(j)[2]]) < 0)
+      orient[j] = -1;
+  }
+}
+
 
 #endif
 
