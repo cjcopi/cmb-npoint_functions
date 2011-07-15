@@ -1,17 +1,16 @@
 #include <iostream>
-#include <iomanip>
 #include <string>
-#include <sstream>
 
 #include <healpix_map.h>
 #include <healpix_map_fitsio.h>
 
 #include <Twopt_Table.h>
 #include <Pixel_Triangles.h>
+#include <Npoint_Functions_Utils.h>
 
 namespace {
   const std::string CALCULATE_EQUILATERAL_THREEPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_equilateral_threept_correlation_function.cpp,v 1.3 2011-07-14 17:34:14 copi Exp $");
+  ("$Id: calculate_equilateral_threept_correlation_function.cpp,v 1.4 2011-07-14 17:35:45 copi Exp $");
 }
 
 
@@ -33,38 +32,20 @@ int main (int argc, char *argv[])
   read_Healpix_map_from_fits (mapfile, map);
   if (map.Scheme() == RING) map.swap_scheme();
 
-  // Figure out how many bins there are by trying to open files.
-  int Nbin = 0;
-  {
-    std::ostringstream sstr;
-    std::ifstream in;
-    while (true) {
-      sstr.str("");
-      sstr << twopt_prefix << std::setw(5) << std::setfill('0') << Nbin
-           << ".dat";
-      ++Nbin;
-      in.open (sstr.str().c_str());
-      if (! in) break;
-      in.close();
-    }
-  }
+  std::vector<std::string> twopt_table_list
+    = Npoint_Functions::get_sequential_file_list (twopt_prefix);
+  std::vector<double> bin_list(twopt_table_list.size());
+  std::vector<double> Corr(twopt_table_list.size());
 
-  std::vector<double> bin_list(Nbin);
-  std::vector<double> Corr(Nbin);
-
-  std::cerr << "Nbin = " << Nbin << std::endl;
-#pragma omp parallel shared(Nbin, Corr, bin_list)
+#pragma omp parallel shared(twopt_table_list, Corr, bin_list)
   {
-    std::ostringstream sstr;
     double C3;
-    Twopt_Table<int> twopt_table;
-    Pixel_Triangles_Equilateral<int> triangles;
+    Npoint_Functions::Twopt_Table<int> twopt_table;
+    Npoint_Functions::Pixel_Triangles_Equilateral<int> triangles;
 
 #pragma omp for schedule(guided)
-    for (int k=0; k < Nbin; ++k) {
-      sstr.str("");
-      sstr << twopt_prefix << std::setw(5) << std::setfill('0') << k << ".dat";
-      twopt_table.read_file (sstr.str());
+    for (size_t k=0; k < twopt_table_list.size(); ++k) {
+      twopt_table.read_file (twopt_table_list[k]);
       // Cast to quiet the compiler about the signed/unsigned comparison.
       if ((size_t)map.Npix() < twopt_table.Npix()) {
       	std::cerr << "Map does not have enough pixels.\n";
@@ -82,7 +63,7 @@ int main (int argc, char *argv[])
     }
   }
 
-  for (int k=0; k < Nbin; ++k) {
+  for (size_t k=0; k < bin_list.size(); ++k) {
     // Same format as spice
     std::cout << std::acos(bin_list[k]) << " " << bin_list[k] << " "
 	      << Corr[k] << std::endl;

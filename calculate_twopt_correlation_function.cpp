@@ -10,7 +10,7 @@
 
 namespace {
   const std::string CALCULATE_TWOPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_twopt_correlation_function.cpp,v 1.5 2011-07-09 17:02:35 copi Exp $");
+  ("$Id: calculate_twopt_correlation_function.cpp,v 1.6 2011-07-10 02:43:47 copi Exp $");
 }
 
 
@@ -33,37 +33,33 @@ int main (int argc, char *argv[])
   if (map.Scheme() == RING) map.swap_scheme();
 
   // Figure out how many bins there are by trying to open files.
-  int Nbin = 0;
+  std::vector<std::string> twopt_table_file;
   {
+    int Nbin = 0;
     std::ostringstream sstr;
-    std::ifstream in;
+    Npoint_Functions::Twopt_Table<int> tp;
     while (true) {
       sstr.str("");
       sstr << twopt_prefix << std::setw(5) << std::setfill('0') << Nbin
            << ".dat";
+      if (! tp.read_file_header (sstr.str())) break;
+      twopt_table_file.push_back (sstr.str());
       ++Nbin;
-      in.open (sstr.str().c_str());
-      if (! in) break;
-      in.close();
     }
   }
 
-  std::vector<double> bin_list(Nbin);
-  std::vector<double> Corr(Nbin);
+  std::vector<double> bin_list(twopt_table_file.size());
+  std::vector<double> Corr(twopt_table_file.size());
 
-  std::cerr << "Nbin = " << Nbin << std::endl;
-#pragma omp parallel shared(Nbin, Corr, bin_list)
+#pragma omp parallel shared(Corr, bin_list, twopt_table_file)
   {
-    std::ostringstream sstr;
     size_t Npair;
     double C2, Csum;
     int p1, p2;
-    Twopt_Table<int> twopt_table;
+    Npoint_Functions::Twopt_Table<int> twopt_table;
 #pragma omp for schedule(guided)
-    for (int k=0; k < Nbin; ++k) {
-      sstr.str("");
-      sstr << twopt_prefix << std::setw(5) << std::setfill('0') << k << ".dat";
-      twopt_table.read_file (sstr.str());
+    for (size_t k=0; k < twopt_table_file.size(); ++k) {
+      twopt_table.read_file (twopt_table_file[k]);
       C2 = 0;
       Npair = 0;
       for (size_t i=0; i < twopt_table.Npix(); ++i) {
@@ -86,7 +82,7 @@ int main (int argc, char *argv[])
     }
   }
 
-  for (int k=0; k < Nbin; ++k) {
+  for (size_t k=0; k < twopt_table_file.size(); ++k) {
     // Same format as spice
     std::cout << std::acos(bin_list[k]) << " " << bin_list[k] << " "
 	      << Corr[k] << std::endl;

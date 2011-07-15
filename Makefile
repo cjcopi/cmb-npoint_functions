@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.7 2011-07-10 03:07:06 copi Exp $
+# $Id: Makefile,v 1.8 2011-07-12 01:44:17 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags`
@@ -16,23 +16,27 @@ OPTIMIZE = -O3 -ffast-math -fomit-frame-pointer -Wall -W
 
 # Special handling of targets
 USE_LIB_HEALPIX = create_twopt_table calculate_twopt_correlation_function \
-	calculate_equilateral_threept_correlation_function
+	calculate_equilateral_threept_correlation_function \
+	calculate_isosceles_threept_correlation_function
 ifdef USE_LZMA_COMPRESSION
 	override DEFINES+=-DUSE_LZMA_COMPRESSION
 	USE_LIB_LZMA = create_twopt_table \
 		calculate_twopt_correlation_function \
-		calculate_equilateral_threept_correlation_function
+		calculate_equilateral_threept_correlation_function \
+		calculate_isosceles_threept_correlation_function
 	USE_LIB_Z=
 else
 	USE_LIB_Z = create_twopt_table calculate_twopt_correlation_function \
-		calculate_equilateral_threept_correlation_function
+		calculate_equilateral_threept_correlation_function \
+		calculate_isosceles_threept_correlation_function
 	USE_LIB_LZMA=
 endif
 # Targets that are built with openmp by default.  To turn this off for a
 # compilation invoke make as
 # make target OPENMP=
 OPENMP_DEFAULT = create_twopt_table calculate_twopt_correlation_function \
-	calculate_equilateral_threept_correlation_function
+	calculate_equilateral_threept_correlation_function \
+	calculate_isosceles_threept_correlation_function
 # Targets that don't need anything special.
 EXTRA_TARGETS =
 
@@ -75,10 +79,11 @@ create_twopt_table : create_twopt_table.o
 calculate_twopt_correlation_function : calculate_twopt_correlation_function.o
 calculate_equilateral_threept_correlation_function : \
 	calculate_equilateral_threept_correlation_function.o
-
+calculate_isosceles_threept_correlation_function : \
+	calculate_isosceles_threept_correlation_function.o
 # Individual file dependencies
 create_twopt_table.o : create_twopt_table.cpp \
-	myRange.h buffered_pair_binary_file.h Twopt_Table.h \
+	buffered_pair_binary_file.h Twopt_Table.h \
 	ZLIB_Wrapper.h LZMA_Wrapper.h
 calculate_twopt_correlation_function.o : \
 	calculate_twopt_correlation_function.cpp \
@@ -88,3 +93,8 @@ calculate_equilateral_threept_correlation_function.o : \
 	calculate_equilateral_threept_correlation_function.cpp \
 	Twopt_Table.h Pixel_Triangles.h \
 	ZLIB_Wrapper.h LZMA_Wrapper.h
+calculate_isosceles_threept_correlation_function.o : \
+	calculate_isosceles_threept_correlation_function.cpp \
+	Twopt_Table.h Pixel_Triangles.h \
+	ZLIB_Wrapper.h LZMA_Wrapper.h
+

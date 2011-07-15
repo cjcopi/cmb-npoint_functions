@@ -4,7 +4,6 @@
 #include <cmath>
 #include <string>
 #include <algorithm>
-#include <sstream>
 
 #include <healpix_base.h>
 #include <healpix_map.h>
@@ -15,7 +14,7 @@
 
 #include <Twopt_Table.h>
 #include <buffered_pair_binary_file.h>
-#include <myRange.h>
+#include <Npoint_Functions_Utils.h>
 
 // Documentation read by doxygen for the front page of the project.
 
@@ -39,13 +38,12 @@
  */
 namespace {
   const std::string CREATE_TWOPT_TABLE_RCSID
-  ("$Id: create_twopt_table.cpp,v 1.8 2011-07-11 18:14:58 copi Exp $");
+  ("$Id: create_twopt_table.cpp,v 1.9 2011-07-13 18:02:10 copi Exp $");
 }
 
 void dtheta_to_cosbin (double dtheta, std::vector<double>& cosbin)
 {
   dtheta *= M_PI / 180.0; // Convert from degrees to radians
-  size_t Nbin = M_PI/dtheta;
   cosbin.clear();
   double theta = M_PI;
   while (theta > 0) {
@@ -55,7 +53,6 @@ void dtheta_to_cosbin (double dtheta, std::vector<double>& cosbin)
 }
 void dcostheta_to_cosbin (double dcostheta, std::vector<double>& cosbin)
 {
-  size_t Nbin = 2/dcostheta;
   cosbin.clear();
   double cb = -1;
   while (cb < 1) {
@@ -67,7 +64,7 @@ void mask_to_pixlist (const Healpix_Map<double>& mask,
 		      std::vector<int>& pixlist)
 {
   pixlist.clear();
-  for (size_t j=0; j < mask.Npix(); ++j) {
+  for (int j=0; j < mask.Npix(); ++j) {
     if (mask[j] > 0.5) pixlist.push_back(j);
   }
 }
@@ -144,7 +141,8 @@ int main (int argc, char *argv[])
     mask_to_pixlist (mask, pixel_list);
   } else {
     pixel_list.resize (12*Nside*Nside);
-    std::generate (pixel_list.begin(), pixel_list.end(), myRange<int>());
+    std::generate (pixel_list.begin(), pixel_list.end(),
+		   Npoint_Functions::myRange<int>());
   }
 
   if (cosbinfile != "") {
@@ -172,15 +170,12 @@ int main (int argc, char *argv[])
     veclist[i] = HBase.pix2vec (pixel_list[i]);
   }
 
-  std::vector<buffered_pair_binary_file<int> > binfiles;
-  {
-    std::ostringstream fstr;
-    for (int k=0; k < Nbin; ++k) {
-      fstr.str("");
-      fstr << tmpfile_prefix << std::setw(5) << std::setfill('0') << k << ".dat";
-      binfiles.push_back(buffered_pair_binary_file<int> (fstr.str()));
-      binfiles[k].create();
-    }
+  std::vector<Npoint_Functions::buffered_pair_binary_file<int> > binfiles;
+  for (size_t k=0; k < Nbin; ++k) {
+    binfiles.push_back(Npoint_Functions::buffered_pair_binary_file<int>
+		       (Npoint_Functions::make_filename
+			(tmpfile_prefix, k))); 
+    binfiles[k].create();
   }
   
   std::cout << "Creating temporary files.\n";
@@ -190,7 +185,7 @@ int main (int argc, char *argv[])
    * sorted withouthaving to actually run a sorting algorithm on them.
    */
   vec3_t<double> v0, v1;
-  int ibin = 0;
+  size_t ibin = 0;
   double dp;
   int dir;
   for (size_t i=0; i < Npix; ++i) {
@@ -228,17 +223,16 @@ int main (int argc, char *argv[])
 #pragma omp parallel shared(binfiles, Nbin, Npix, pixel_list, bin_list, \
   tmpfile_prefix, twoptfile_prefix)
   {
-    Twopt_Table<int> twopt_table (pixel_list, bin_list[0]);
+    Npoint_Functions::Twopt_Table<int>
+      twopt_table (pixel_list, bin_list[0]);
 
     int i, j;
-    std::ostringstream sstr;
 #pragma omp for schedule(guided)
     for (size_t k=0; k < Nbin; ++k) {
       twopt_table.reset();
       twopt_table.bin_value (bin_list[k]);
-      sstr.str("");
-      sstr << tmpfile_prefix << std::setw(5) << std::setfill('0') << k << ".dat";
-      buffered_pair_binary_file<int> binfile(sstr.str());
+      Npoint_Functions::buffered_pair_binary_file<int>
+	binfile(Npoint_Functions::make_filename (tmpfile_prefix, k));
 
       // Next open the file for reading
       binfile.open_read();
@@ -246,11 +240,11 @@ int main (int argc, char *argv[])
       while (binfile.read_next_pair (i, j)) {
 	twopt_table.add_pair (i, j);
       }
-      if (clean_tmpfiles) unlink(sstr.str().c_str());
+      if (clean_tmpfiles) unlink(binfile.filename().c_str());
 
-      sstr.str("");
-      sstr << twoptfile_prefix << std::setw(5) << std::setfill('0') << k << ".dat";
-      twopt_table.write_file (sstr.str());
+      twopt_table.write_file 
+	(Npoint_Functions::make_filename (twoptfile_prefix, k));
+
     }
   }
   std::cout << "Two point tables created.\n";
