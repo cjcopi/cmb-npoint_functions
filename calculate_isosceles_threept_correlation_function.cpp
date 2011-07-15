@@ -11,8 +11,8 @@
 #include <Npoint_Functions_Utils.h>
 
 namespace {
-  const std::string CALCULATE_EQUILATERAL_THREEPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_equilateral_threept_correlation_function.cpp,v 1.4 2011-07-14 17:35:45 copi Exp $");
+  const std::string CALCULATE_ISOSCELES_THREEPT_CORRELATION_FUNCTION_RCSID
+  ("$Id: calculate_isosceles_threept_correlation_function.cpp,v 1.1 2011-07-15 16:23:06 copi Exp $");
 }
 
 
