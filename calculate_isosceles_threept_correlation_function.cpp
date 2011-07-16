@@ -1,7 +1,6 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <cstdlib>
 
 #include <healpix_map.h>
 #include <healpix_map_fitsio.h>
@@ -12,7 +11,7 @@
 
 namespace {
   const std::string CALCULATE_ISOSCELES_THREEPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_isosceles_threept_correlation_function.cpp,v 1.1 2011-07-15 16:23:06 copi Exp $");
+  ("$Id: calculate_isosceles_threept_correlation_function.cpp,v 1.2 2011-07-15 16:24:27 copi Exp $");
 }
 
 
@@ -30,7 +29,13 @@ int main (int argc, char *argv[])
   if (argc != 4) usage (argv[0]);
   std::string mapfile = argv[1];
   std::string twopt_prefix = argv[2];
-  double cosbin_equal = std::cos(atof(argv[3])*M_PI/180);
+  double ang;
+  if (! Npoint_Functions::from_string (argv[3], ang)) {
+    std::cerr << "Error converting argument to an angle : " << argv[3]
+	      << std::endl; 
+    usage (argv[0]);
+  }
+  double cosbin_equal = std::cos(ang*M_PI/180);
   double dcosbin = 3;
   int icosbin = 0;
 

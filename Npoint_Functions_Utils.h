@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string NPOINT_FUNCTIONS_UTILS_RCSID
-  ("$Id: Twopt_Table.h,v 1.13 2011-07-13 03:55:38 copi Exp $");
+  ("$Id: Npoint_Functions_Utils.h,v 1.1 2011-07-16 01:45:40 copi Exp $");
   /// @endcond
 }
 
@@ -56,6 +56,19 @@ namespace Npoint_Functions {
       ++Nbin;
     }
     return files;
+  }
+
+  /** Convert a string to any (valid) type.
+   *  The conversion is done using a stringstream and the usual c++ io
+   *  mechanism.  This is not the most robust way to do things and it
+   *  doesn't allow for complete error checking, however, it is simple
+   *  which is what we want here.
+   */
+  template<typename T>
+  bool from_string (const std::string& instr, T& val)
+  {
+    std::istringstream iss(instr);
+    return !(iss >> val).fail();
   }
 
   /** Generate a range of values.
