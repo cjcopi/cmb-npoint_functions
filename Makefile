@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.10 2011-07-17 03:08:32 copi Exp $
+# $Id: Makefile,v 1.11 2011-07-17 03:34:19 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags`
@@ -25,7 +25,7 @@ USE_COMPRESSION = create_twopt_table \
 		calculate_isosceles_threept_correlation_function
 ifdef USE_NO_COMPRESSION
 	override DEFINES+=-DUSE_NO_COMPRESSION
-	COMPRESSION_WRAPPER=
+	COMPRESSION_WRAPPER=No_Compression_Wrapper.h
 else ifdef USE_LZMA_COMPRESSION
 	override DEFINES+=-DUSE_LZMA_COMPRESSION
 	USE_LIB_LZMA = $(USE_COMPRESSION)
@@ -100,7 +100,6 @@ calculate_equilateral_threept_correlation_function.o : \
 	calculate_equilateral_threept_correlation_function.cpp \
 	Twopt_Table.h Pixel_Triangles.h \
 	$(COMPRESSION_WRAPPER) \
-	ZLIB_Wrapper.h LZMA_Wrapper.h \
 	Npoint_Functions_Utils.h
 calculate_isosceles_threept_correlation_function.o : \
 	calculate_isosceles_threept_correlation_function.cpp \
