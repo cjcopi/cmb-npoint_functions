@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.11 2011-07-17 03:34:19 copi Exp $
+# $Id: Makefile,v 1.12 2011-07-17 03:39:05 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags`
@@ -52,7 +52,9 @@ ALL_TARGETS=$(sort $(USE_LIB_HEALPIX) $(USE_COMPRESSION) \
 CPPFLAGS = $(INCLUDES) $(OPTIMIZE) $(DEFINES)
 
 all :
-	@echo Available targets: $(ALL_TARGETS)
+	@echo Available targets:
+# Print the targets one per line
+	@echo $(ALL_TARGETS) | sed 's/\s/\n/g' | sed 's/^/  /g'
 	@echo Use a command like: make target USE_LZMA_COMPRESSION=1
 	@echo to use LZMA compression instead of libz.
 	@echo Use a command like: make target USE_NO_COMPRESSION=1
@@ -73,6 +75,11 @@ clean :
 
 clean-doc :
 	$(RM) -r html
+
+clean-all : clean clean-doc
+
+# Targets to always be run when asked for.
+.PHONY : all clean clean-doc clean-all doc
 
 # Library dependencies.  Set the libraries and include paths.
 $(USE_LIB_HEALPIX) : override LDFLAGS+=$(HEALPIX_LIBS)
