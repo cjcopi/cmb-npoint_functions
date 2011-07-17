@@ -9,7 +9,7 @@
 namespace {
   /// @cond IDTAG
   const std::string ZLIB_WRAPPER_RCSID
-  ("$Id: ZLIB_Wrapper.h,v 1.1 2011-07-09 22:23:45 copi Exp $");
+  ("$Id: ZLIB_Wrapper.h,v 1.2 2011-07-15 16:16:23 copi Exp $");
   /// @endcond
 }
 
@@ -77,7 +77,7 @@ namespace Npoint_Functions {
       out.write (reinterpret_cast<char*>(buf_comp.get()),
 		 Nbytes - strm.avail_out);
       deflateEnd (&strm);
-      return true;
+      return (! out.fail());
     }
 
     /** Read the buffer from the stream with compression.
@@ -123,7 +123,7 @@ namespace Npoint_Functions {
 	return false;
       }
       inflateEnd (&strm);
-      return true;
+      return (! in.fail());
     }
   };
 }
