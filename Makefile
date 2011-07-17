@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.9 2011-07-15 16:16:23 copi Exp $
+# $Id: Makefile,v 1.10 2011-07-17 03:08:32 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags`
@@ -18,18 +18,23 @@ OPTIMIZE = -O3 -ffast-math -fomit-frame-pointer -Wall -W
 USE_LIB_HEALPIX = create_twopt_table calculate_twopt_correlation_function \
 	calculate_equilateral_threept_correlation_function \
 	calculate_isosceles_threept_correlation_function
-ifdef USE_LZMA_COMPRESSION
-	override DEFINES+=-DUSE_LZMA_COMPRESSION
-	USE_LIB_LZMA = create_twopt_table \
+# Targets that may use compression
+USE_COMPRESSION = create_twopt_table \
 		calculate_twopt_correlation_function \
 		calculate_equilateral_threept_correlation_function \
 		calculate_isosceles_threept_correlation_function
+ifdef USE_NO_COMPRESSION
+	override DEFINES+=-DUSE_NO_COMPRESSION
+	COMPRESSION_WRAPPER=
+else ifdef USE_LZMA_COMPRESSION
+	override DEFINES+=-DUSE_LZMA_COMPRESSION
+	USE_LIB_LZMA = $(USE_COMPRESSION)
 	USE_LIB_Z=
+	COMPRESSION_WRAPPER=LZMA_Wrapper.h
 else
-	USE_LIB_Z = create_twopt_table calculate_twopt_correlation_function \
-		calculate_equilateral_threept_correlation_function \
-		calculate_isosceles_threept_correlation_function
+	USE_LIB_Z = $(USE_COMPRESSION)
 	USE_LIB_LZMA=
+	COMPRESSION_WRAPPER=ZLIB_Wrapper.h
 endif
 # Targets that are built with openmp by default.  To turn this off for a
 # compilation invoke make as
@@ -41,7 +46,7 @@ OPENMP_DEFAULT = create_twopt_table calculate_twopt_correlation_function \
 EXTRA_TARGETS =
 
 # Sort also removes duplicates which is what we really want.
-ALL_TARGETS=$(sort $(USE_LIB_HEALPIX) $(USE_LIB_LZMA) \
+ALL_TARGETS=$(sort $(USE_LIB_HEALPIX) $(USE_COMPRESSION) \
                    $(OPENMP_DEFAULT) $(EXTRA_TARGETS) )
 
 CPPFLAGS = $(INCLUDES) $(OPTIMIZE) $(DEFINES)
@@ -50,6 +55,8 @@ all :
 	@echo Available targets: $(ALL_TARGETS)
 	@echo Use a command like: make target USE_LZMA_COMPRESSION=1
 	@echo to use LZMA compression instead of libz.
+	@echo Use a command like: make target USE_NO_COMPRESSION=1
+	@echo to use no compression.
 	@echo "  [Note that libz is about 5 times faster in creating two"
 	@echo "   point tables and slightly faster in calculating the two point"
 	@echo "  correlation function.]"
@@ -84,18 +91,19 @@ calculate_isosceles_threept_correlation_function : \
 # Individual file dependencies
 create_twopt_table.o : create_twopt_table.cpp \
 	buffered_pair_binary_file.h Twopt_Table.h \
-	ZLIB_Wrapper.h LZMA_Wrapper.h
+	$(COMPRESSION_WRAPPER)
 calculate_twopt_correlation_function.o : \
 	calculate_twopt_correlation_function.cpp \
 	Twopt_Table.h \
-	ZLIB_Wrapper.h LZMA_Wrapper.h
+	$(COMPRESSION_WRAPPER)
 calculate_equilateral_threept_correlation_function.o : \
 	calculate_equilateral_threept_correlation_function.cpp \
 	Twopt_Table.h Pixel_Triangles.h \
+	$(COMPRESSION_WRAPPER) \
 	ZLIB_Wrapper.h LZMA_Wrapper.h \
 	Npoint_Functions_Utils.h
 calculate_isosceles_threept_correlation_function.o : \
 	calculate_isosceles_threept_correlation_function.cpp \
 	Twopt_Table.h Pixel_Triangles.h \
-	ZLIB_Wrapper.h LZMA_Wrapper.h \
+	$(COMPRESSION_WRAPPER) \
 	Npoint_Functions_Utils.h

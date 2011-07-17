@@ -6,7 +6,9 @@
 #include <fstream>
 #include <tr1/memory> // For std::tr1::shared_ptr
 
-#ifdef USE_LZMA_COMPRESSION
+#if defined(USE_NO_COMPRESSION)
+#  include <No_Compression_Wrapper.h>
+#elif defined(USE_LZMA_COMPRESSION)
 #  include <LZMA_Wrapper.h>
 #else
 #  include <ZLIB_Wrapper.h>
@@ -15,7 +17,7 @@
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.13 2011-07-13 03:55:38 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.14 2011-07-15 16:16:23 copi Exp $");
   /// @endcond
 }
 
@@ -51,14 +53,20 @@ namespace Npoint_Functions {
    *  power/memory to decompress the data.
    *
    *  By default zlib is used for compression.  This can be changed to LZMA
-   *  by defining USE_LZMA_COMPRESSION when compiling.  In one test at
+   *  by defining USE_LZMA_COMPRESSION when compiling or to turn off using
+   *  compression by defining USE_NO_COMPRESSION.  In one test at
    *  NSIDE=128 it was found that zlib is about 5 times faster at creating
    *  tables and slightly faster in calculating the two point correlation
-   *  function (so win-win), hence its choice as the default.
+   *  function (so win-win) than lzma.  For large NSIDE~128 the
+   *  uncompressed files are quite large so io becomes a major bottle neck
+   *  for any calculation using the two point tables. Hence the choice of
+   *  zlib  as the default.
    */
   template<typename T>
   class Twopt_Table : private
-#ifdef USE_LZMA_COMPRESSION
+#if defined(USE_NO_COMPRESSION)
+  No_Compression_Wrapper
+#elif defined(USE_LZMA_COMPRESSION)
   LZMA_Wrapper
 #else
   ZLIB_Wrapper
