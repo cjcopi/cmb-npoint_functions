@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.8 2011-07-12 01:44:17 copi Exp $
+# $Id: Makefile,v 1.9 2011-07-15 16:16:23 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags`
@@ -92,9 +92,10 @@ calculate_twopt_correlation_function.o : \
 calculate_equilateral_threept_correlation_function.o : \
 	calculate_equilateral_threept_correlation_function.cpp \
 	Twopt_Table.h Pixel_Triangles.h \
-	ZLIB_Wrapper.h LZMA_Wrapper.h
+	ZLIB_Wrapper.h LZMA_Wrapper.h \
+	Npoint_Functions_Utils.h
 calculate_isosceles_threept_correlation_function.o : \
 	calculate_isosceles_threept_correlation_function.cpp \
 	Twopt_Table.h Pixel_Triangles.h \
-	ZLIB_Wrapper.h LZMA_Wrapper.h
-
+	ZLIB_Wrapper.h LZMA_Wrapper.h \
+	Npoint_Functions_Utils.h
