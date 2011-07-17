@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.12 2011-07-17 03:39:05 copi Exp $
+# $Id: Makefile,v 1.13 2011-07-17 03:58:25 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags`
@@ -52,6 +52,7 @@ ALL_TARGETS=$(sort $(USE_LIB_HEALPIX) $(USE_COMPRESSION) \
 CPPFLAGS = $(INCLUDES) $(OPTIMIZE) $(DEFINES)
 
 all :
+	@echo
 	@echo Available targets:
 # Print the targets one per line
 	@echo $(ALL_TARGETS) | sed 's/\s/\n/g' | sed 's/^/  /g'
@@ -62,6 +63,7 @@ all :
 	@echo "  [Note that libz is about 5 times faster in creating two"
 	@echo "   point tables and slightly faster in calculating the two point"
 	@echo "  correlation function.]"
+	@echo
 
 # Rule for linking all the targets
 $(ALL_TARGETS) :
