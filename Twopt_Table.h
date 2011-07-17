@@ -17,7 +17,7 @@
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.14 2011-07-15 16:16:23 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.15 2011-07-17 03:34:19 copi Exp $");
   /// @endcond
 }
 
@@ -115,7 +115,10 @@ namespace Npoint_Functions {
       return read_buffer (in, buf->get(), Nelem*sizeof(T));
     }
 
-    /** Read the header from the file.
+    /** Read the header from the stream.
+     *  It is assumed the header starts at the current stream position.
+     *  On success thee stream position is left immediately after the
+     *  header. On failure the stream is left in an undefined state.
      */
     bool read_header_from_stream (std::ifstream& in, char& version)
     {
@@ -134,7 +137,7 @@ namespace Npoint_Functions {
 	in.read (reinterpret_cast<char*>(&pixlist[p]), sizeof(T));
       }
       in.read (reinterpret_cast<char*>(&nmax), sizeof(nmax));
-      return true;
+      return (! in.fail());
     }
   public :
     /** \name Constructors
@@ -143,8 +146,8 @@ namespace Npoint_Functions {
     //@{
     /// Generic constructor.
     Twopt_Table () : table_write(), table_read(), pixlist(), cosbin(0), nmax(0) {}
-    /** Construct a table given the pixel list and the value of the left edge
-     *  of the bin.
+    /** Construct and initialize a table given the pixel list and the
+     *  values of the bins.
      */
     Twopt_Table (const std::vector<T>& pl, double binvalue)
       : table_write(pl.size()), table_read(), pixlist(pl), cosbin(binvalue), nmax(0) {}
@@ -170,7 +173,7 @@ namespace Npoint_Functions {
      * Nmax (size_t)
      * table values (Npix x Nmax of them of type T written in row major order)
      *
-     * The table is -1 padded to make it rectangular.
+     *  The table is -1 padded to make it rectangular.
      */
     void write_file (const std::string& filename)
     {

@@ -6,7 +6,7 @@
 namespace {
   /// @cond IDTAG
   const std::string NO_COMPRESSION_WRAPPER_RCSID
-  ("$Id: ZLIB_Wrapper.h,v 1.2 2011-07-15 16:16:23 copi Exp $");
+  ("$Id: No_Compression_Wrapper.h,v 1.1 2011-07-17 03:34:19 copi Exp $");
   /// @endcond
 }
 
@@ -22,7 +22,7 @@ namespace Npoint_Functions {
     No_Compression_Wrapper() {}
 
     /** Write the buffer to the stream without compression.
-     *   The provided buffer, \a buf_in, of size \a Nbytes is written to
+     *  The provided buffer, \a buf_in, of size \a Nbytes is written to
      *  the output stream, \a out, at the current location in the file.
      */
     bool write_buffer (std::ofstream& out,

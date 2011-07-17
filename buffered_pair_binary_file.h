@@ -3,12 +3,12 @@
 
 #include <string>
 #include <fstream>
-#include <tr1/memory>
+#include <tr1/memory> // for std::tr1::shared_ptr
 
 namespace {
   /// @cond IDTAG
   const std::string BUFFERED_PAIR_BINARY_FILE_RCSID
-  ("$Id: buffered_pair_binary_file.h,v 1.2 2011-07-07 18:29:29 copi Exp $");
+  ("$Id: buffered_pair_binary_file.h,v 1.3 2011-07-15 16:16:23 copi Exp $");
   /// @endcond
 }
 
@@ -89,7 +89,7 @@ namespace Npoint_Functions {
 
     /** Append a pair of values to the binary file.
      *  The values are buffered internally and only written when the buffer
-     *  fills.  To for writing values see flush() and close().
+     *  fills.  To write the values to disk see flush() and close().
      */
     void append (T i, T j)
     {
@@ -99,8 +99,6 @@ namespace Npoint_Functions {
     }
 
     /** Read the next pair of values from the binary file.
-     *  The file is read into the buffer in chunks.  The values are accessed
-     *  sequentially. 
      */
     bool read_next_pair (T& i, T& j)
     {
@@ -118,9 +116,9 @@ namespace Npoint_Functions {
     }
   
     /** Flush the write buffer to disk.
-     *  The internal buffer is written to disk (which may be buffered by the
-     *  C++ iostream routines).  This routine is safe to call on files opened
-     *  for reading (nothing will happen).
+     *  The internal buffer is written to disk (which may also be buffered
+     *  by the C++ iostream routines).  This routine is safe to call on
+     *  files opened for reading (nothing will happen).
      */
     void flush()
     {
