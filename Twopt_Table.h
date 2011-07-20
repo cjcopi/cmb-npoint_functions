@@ -17,7 +17,7 @@
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.15 2011-07-17 03:34:19 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.16 2011-07-17 13:39:33 copi Exp $");
   /// @endcond
 }
 
@@ -79,7 +79,7 @@ namespace Npoint_Functions {
     std::tr1::shared_ptr<T> table_read;
     std::vector<T> pixlist;
     double cosbin;
-    size_t nmax;
+    size_t nside, nmax;
 
     /** Write the output table to the stream with compression.
      *  The table and nmax MUST be set correctly before calling.
@@ -126,11 +126,12 @@ namespace Npoint_Functions {
 
       // First version
       in.read (&version, sizeof(version));
-      if (version != 1) {
-	std::cerr << "Twopt_Table only supports file format version 1\n";
+      if (version != 2) {
+	std::cerr << "Twopt_Table only supports file format version 2\n";
 	return false;
       }
       in.read (reinterpret_cast<char*>(&cosbin), sizeof(cosbin));
+      in.read (reinterpret_cast<char*>(&nside), sizeof(nside));
       in.read (reinterpret_cast<char*>(&Npix), sizeof(Npix));
       pixlist.resize(Npix);
       for (size_t p=0; p < Npix; ++p) {
@@ -145,12 +146,14 @@ namespace Npoint_Functions {
      */
     //@{
     /// Generic constructor.
-    Twopt_Table () : table_write(), table_read(), pixlist(), cosbin(0), nmax(0) {}
+    Twopt_Table () : table_write(), table_read(), pixlist(), cosbin(0),
+		     nside(0), nmax(0) {} 
     /** Construct and initialize a table given the pixel list and the
      *  values of the bins.
      */
-    Twopt_Table (const std::vector<T>& pl, double binvalue)
-      : table_write(pl.size()), table_read(), pixlist(pl), cosbin(binvalue), nmax(0) {}
+    Twopt_Table (size_t Nside, const std::vector<T>& pl, double binvalue)
+      : table_write(pl.size()), table_read(), pixlist(pl),
+	cosbin(binvalue), nside(Nside), nmax(0) {}
     //@}
 
     /// Add an entry to the two point table.
@@ -177,7 +180,7 @@ namespace Npoint_Functions {
      */
     void write_file (const std::string& filename)
     {
-      char version = 1;
+      char version = 2;
       size_t Npix = pixlist.size();
       std::ofstream out (filename.c_str(),
 			 std::fstream::out | std::fstream::trunc
@@ -185,6 +188,7 @@ namespace Npoint_Functions {
       // First header
       out.write (&version, sizeof(version));
       out.write (reinterpret_cast<char*>(&cosbin), sizeof(cosbin));
+      out.write (reinterpret_cast<char*>(&nside), sizeof(nside));
       out.write (reinterpret_cast<char*>(&Npix), sizeof(Npix));
       for (size_t p=0; p < Npix; ++p) {
 	out.write (reinterpret_cast<char*>(&pixlist[p]), sizeof(T));
@@ -268,6 +272,8 @@ namespace Npoint_Functions {
     inline const std::vector<T>& pixel_list () const { return pixlist; }
     /// The number of pixels.
     inline size_t Npix() const { return pixlist.size(); }
+    /// The HEALPix resolution of the table.
+    inline size_t Nside() const { return nside; }
     /// The maximum number of values in each row of the table.
     inline size_t Nmax() const { return nmax; }
     /** Value from the two point read table.

@@ -38,7 +38,7 @@
  */
 namespace {
   const std::string CREATE_TWOPT_TABLE_RCSID
-  ("$Id: create_twopt_table.cpp,v 1.9 2011-07-13 18:02:10 copi Exp $");
+  ("$Id: create_twopt_table.cpp,v 1.10 2011-07-15 16:16:23 copi Exp $");
 }
 
 void dtheta_to_cosbin (double dtheta, std::vector<double>& cosbin)
@@ -224,7 +224,7 @@ int main (int argc, char *argv[])
   tmpfile_prefix, twoptfile_prefix)
   {
     Npoint_Functions::Twopt_Table<int>
-      twopt_table (pixel_list, bin_list[0]);
+      twopt_table (Nside, pixel_list, bin_list[0]);
 
     int i, j;
 #pragma omp for schedule(guided)
