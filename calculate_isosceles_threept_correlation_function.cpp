@@ -11,7 +11,7 @@
 
 namespace {
   const std::string CALCULATE_ISOSCELES_THREEPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_isosceles_threept_correlation_function.cpp,v 1.2 2011-07-15 16:24:27 copi Exp $");
+  ("$Id: calculate_isosceles_threept_correlation_function.cpp,v 1.3 2011-07-16 23:52:38 copi Exp $");
 }
 
 
@@ -87,7 +87,7 @@ int main (int argc, char *argv[])
 	  * map[triangles(j)[2]];
       }
       if (triangles.size() != 0) C3 /= triangles.size();
-      bin_list[k] = triangles.lengths()[1];
+      bin_list[k] = triangles.lengths()[0];
       Corr[k] = C3;
     }
   }
