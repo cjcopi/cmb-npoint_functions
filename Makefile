@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.13 2011-07-17 03:58:25 copi Exp $
+# $Id: Makefile,v 1.14 2011-07-17 03:59:44 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags`
@@ -9,20 +9,26 @@ DOXYGEN = doxygen
 DEFINES=
 override INCLUDES += -I.
 # Set to the appropriate flag for openmp compilation, for
-# g++ this is -fopenmp.  See OPENMP_DEFAULT for targets that use this.
-OPENMP=-fopenmp
+# g++ this is -fopenmp.  See OPENMP_DEFAULT for targets that use
+# this. Invoke make as
+# make target OPENMP=
+# to avoid using openmp for the default targets.  The -DOMP is included so
+# that programs can use this for conditional inclusion of code.
+OPENMP=-DOMP -fopenmp
 
 OPTIMIZE = -O3 -ffast-math -fomit-frame-pointer -Wall -W
 
 # Special handling of targets
 USE_LIB_HEALPIX = create_twopt_table calculate_twopt_correlation_function \
 	calculate_equilateral_threept_correlation_function \
-	calculate_isosceles_threept_correlation_function
+	calculate_isosceles_threept_correlation_function \
+	calculate_equilateral_fourpt_correlation_function
 # Targets that may use compression
 USE_COMPRESSION = create_twopt_table \
 		calculate_twopt_correlation_function \
 		calculate_equilateral_threept_correlation_function \
-		calculate_isosceles_threept_correlation_function
+		calculate_isosceles_threept_correlation_function \
+		calculate_equilateral_fourpt_correlation_function
 ifdef USE_NO_COMPRESSION
 	override DEFINES+=-DUSE_NO_COMPRESSION
 	COMPRESSION_WRAPPER=No_Compression_Wrapper.h
@@ -41,7 +47,8 @@ endif
 # make target OPENMP=
 OPENMP_DEFAULT = create_twopt_table calculate_twopt_correlation_function \
 	calculate_equilateral_threept_correlation_function \
-	calculate_isosceles_threept_correlation_function
+	calculate_isosceles_threept_correlation_function \
+	calculate_equilateral_fourpt_correlation_function
 # Targets that don't need anything special.
 EXTRA_TARGETS =
 
@@ -88,7 +95,7 @@ $(USE_LIB_HEALPIX) : override LDFLAGS+=$(HEALPIX_LIBS)
 $(USE_LIB_HEALPIX) : override CPPFLAGS+=$(HEALPIX_INC)
 $(USE_LIB_LZMA) : override LDFLAGS+=-llzma
 $(USE_LIB_Z) : override LDFLAGS+=-lz
-$(OPENMP_DEFAULT) : override CPPFLAGS+=$(OPENMP)
+$(OPENMP_DEFAULT) : override CPPFLAGS+=$(OPENMP) 
 
 # Individual target dependencies
 create_twopt_table : create_twopt_table.o
@@ -97,6 +104,9 @@ calculate_equilateral_threept_correlation_function : \
 	calculate_equilateral_threept_correlation_function.o
 calculate_isosceles_threept_correlation_function : \
 	calculate_isosceles_threept_correlation_function.o
+calculate_equilateral_fourpt_correlation_function : \
+	calculate_equilateral_fourpt_correlation_function.o
+
 # Individual file dependencies
 create_twopt_table.o : create_twopt_table.cpp \
 	buffered_pair_binary_file.h Twopt_Table.h \
@@ -112,6 +122,11 @@ calculate_equilateral_threept_correlation_function.o : \
 	Npoint_Functions_Utils.h
 calculate_isosceles_threept_correlation_function.o : \
 	calculate_isosceles_threept_correlation_function.cpp \
+	Twopt_Table.h Pixel_Triangles.h \
+	$(COMPRESSION_WRAPPER) \
+	Npoint_Functions_Utils.h
+calculate_equilateral_fourpt_correlation_function.o : \
+	calculate_equilateral_fourpt_correlation_function.cpp \
 	Twopt_Table.h Pixel_Triangles.h \
 	$(COMPRESSION_WRAPPER) \
 	Npoint_Functions_Utils.h
