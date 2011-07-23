@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.8 2011-07-23 01:06:09 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.9 2011-07-23 01:16:55 copi Exp $");
   /// @endcond
 }
 
@@ -226,7 +226,7 @@ namespace Npoint_Functions {
       for (size_t j1=0; j1 < t2.Npix(); ++j1) {
 	i1 = j1; // to make the code look symmetric
 	p1 = t2.pixel_list(i1);
-	for (size_t j2=j1+1; (j2 < t2.Nmax()) && (t2(j1,j2) != -1); ++j2) {
+	for (size_t j2=0; (j2 < t2.Nmax()) && (t2(j1,j2) != -1); ++j2) {
 	  i2 = t2(j1,j2);
 	  p2 = t2.pixel_list(i2);
 	  // Finally can search for and add appropriate pairs.
