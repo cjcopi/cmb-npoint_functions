@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.13 2011-07-23 02:13:28 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.14 2011-07-23 02:17:22 copi Exp $");
   /// @endcond
 }
 
@@ -76,6 +76,25 @@ namespace {
 }
 
 namespace Npoint_Functions {
+    /** Allowed orientations of a triangle.
+     *  See calculate_orientation() for conventions.
+     *  \relates Pixel_Triangles
+     */
+    enum Orientation { RIGHTHANDED, LEFTHANDED };
+
+    /** Calculate the Orientation from three vectors.
+     *  The orientation is either righthanded or lefthanded.
+     *  Righthanded is defined by 
+     *  \f[ (\hat n_1\times\hat n_2)\cdot \hat n_3 > 0. \f]
+     *  \relates Pixel_Triangles
+     */
+    Orientation calculate_orientation (const vec3& n1, const vec3& n2,
+				       const vec3& n3)
+    {
+      double val = dotprod (crossprod (n1, n2), n3);
+      return ((val > 0) ? RIGHTHANDED : LEFTHANDED);
+    }
+
   /** Storage for pixel triangles.
    *  All possible triangles are stored, including cyclic permutations of
    *  triangle with the same side lengths.  See Pixel_Triangles_Isosceles or
@@ -86,11 +105,6 @@ namespace Npoint_Functions {
    */
   template<typename T>
   class Pixel_Triangles {
-  public :
-    /** Allowed orientations of a triangle.
-     *  See calculate_orientation() for conventions.
-     */
-    enum Orientation { RIGHTHANDED, LEFTHANDED };
   private :
     std::vector<std::vector<T> > triangles; // List of pixels in triangle.
     std::vector<double> edge_length; // Length of triangle edges.
@@ -98,18 +112,6 @@ namespace Npoint_Functions {
      /// Orientation of the triangles.
     std::vector<Orientation> orient;
 
-    /** Calculate the Orientation from three vectors.
-     *  The orientation is either righthanded or lefthanded.
-     *  Righthanded is defined by 
-     *  \f[ (\hat n_1\times\hat n_2)\cdot \hat n_3 > 0. \f]
-     */
-    Orientation calculate_orientation (const vec3& n1, const vec3& n2,
-				       const vec3& n3)
-    {
-      double val = dotprod (crossprod (n1, n2), n3);
-      return ((val > 0) ? this->RIGHTHANDED : this->LEFTHANDED);
-    }
-  
     /// Add a triangle to the list.
     inline void add (const T& p1, const T& p2, const T& p3)
     {
@@ -264,7 +266,7 @@ namespace Npoint_Functions {
 	}
       }
       // All triangles are righthanded.
-      this->orient.assign (this->size(), this->RIGHTHANDED);
+      this->orient.assign (this->size(), RIGHTHANDED);
     }
   };
 
@@ -318,7 +320,7 @@ namespace Npoint_Functions {
 	}
       }
       // All triangles are righthanded.
-      this->orient.assign (this->size(), this->RIGHTHANDED);
+      this->orient.assign (this->size(), RIGHTHANDED);
     }
   };
 }
