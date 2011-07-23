@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.12 2011-07-23 02:05:57 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.13 2011-07-23 02:13:28 copi Exp $");
   /// @endcond
 }
 
@@ -87,6 +87,9 @@ namespace Npoint_Functions {
   template<typename T>
   class Pixel_Triangles {
   public :
+    /** Allowed orientations of a triangle.
+     *  See calculate_orientation() for conventions.
+     */
     enum Orientation { RIGHTHANDED, LEFTHANDED };
   private :
     std::vector<std::vector<T> > triangles; // List of pixels in triangle.
@@ -95,8 +98,8 @@ namespace Npoint_Functions {
      /// Orientation of the triangles.
     std::vector<Orientation> orient;
 
-    /** Calculate the orientation from three vectors.
-     *  The orientation is an integer:  +1 for righthanded and -1 for lefthanded.
+    /** Calculate the Orientation from three vectors.
+     *  The orientation is either righthanded or lefthanded.
      *  Righthanded is defined by 
      *  \f[ (\hat n_1\times\hat n_2)\cdot \hat n_3 > 0. \f]
      */
@@ -190,10 +193,8 @@ namespace Npoint_Functions {
      */
     inline const std::vector<T>& operator() (size_t j) const
     { return triangles[j]; }
-    /** The orientation of the triangle.
-     *  A value of +1 represents righthanded triangles and -1 for
-     *  lefthanded triangles.  See calculate_orientation() for more
-     *  details. 
+    /** The Orientation of the triangle.
+     *   See calculate_orientation() for more details. 
      */
     inline Orientation orientation (size_t j) const
     { return orient[j]; }
