@@ -10,13 +10,14 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.7 2011-07-23 01:00:31 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.8 2011-07-23 01:06:09 copi Exp $");
   /// @endcond
 }
 
 namespace {
   /** Helper function to create a list of vectors pointing to HEALPix pixel
-   * centers. 
+   *  centers.  The vectors are labelled by the pixel INDEX in the
+   *  two point table, not the actual pixel number.
    */
   template<typename T>
   void fill_vector_list (const Npoint_Functions::Twopt_Table<T>& t,
@@ -25,7 +26,7 @@ namespace {
     Healpix_Base HBase (t.Nside(), NEST, SET_NSIDE);
     veclist.resize (t.Npix());
     for (size_t i=0; i < t.Npix(); ++i) {
-      veclist[i] = HBase.pix2vec (t.pixel_list()[i]);
+      veclist[i] = HBase.pix2vec (t.pixel_list(i));
     }
   }
 }
@@ -139,19 +140,19 @@ namespace Npoint_Functions {
 
       for (size_t j1=0; j1 < t1.Npix(); ++j1) {
 	i1 = j1; // to make the code look symmetric
-	p1 = t1.pixel_list()[i1];
+	p1 = t1.pixel_list(i1);
 	for (size_t j2=0; (j2 < t1.Nmax()) && (t1(j1,j2) != -1); ++j2) {
 	  i2 = t1(j1,j2);
-	  p2 = t1.pixel_list()[i2];
+	  p2 = t1.pixel_list(i2);
 	  // Finally can search for and add appropriate pairs.
 	  trip.clear();
 	  append_matches (&t2(i1,0), t2.Nmax(), &t3(i2,0), t3.Nmax(),
 			  trip);
 	  // Now put all the triplets in the list
 	  for (size_t k=0; k < trip.size(); ++k) {
-	    add (p1, p2, t1.pixel_list()[trip[k]]);
+	    add (p1, p2, t1.pixel_list(trip[k]));
 	    orient.push_back (calculate_orientation (v[i1], v[i2],
-						     trip[k])); 
+						     v[trip[k]])); 
 	  }
 	}
       }
@@ -212,7 +213,7 @@ namespace Npoint_Functions {
     void find_triangles (const Twopt_Table<T>& t1,
 			 const Twopt_Table<T>& t2)
     {
-      T p1, p2, p3;
+      T p1, p2;
       T i1, i2;
       std::vector<T> trip;
       this->reset();
@@ -224,21 +225,20 @@ namespace Npoint_Functions {
 
       for (size_t j1=0; j1 < t2.Npix(); ++j1) {
 	i1 = j1; // to make the code look symmetric
-	p1 = t2.pixel_list()[i1];
+	p1 = t2.pixel_list(i1);
 	for (size_t j2=j1+1; (j2 < t2.Nmax()) && (t2(j1,j2) != -1); ++j2) {
 	  i2 = t2(j1,j2);
-	  p2 = t2.pixel_list()[i2];
+	  p2 = t2.pixel_list(i2);
 	  // Finally can search for and add appropriate pairs.
 	  trip.clear();
 	  this->append_matches (&t1(i1,0), t1.Nmax(), &t1(i2,0), t1.Nmax(),
 				trip);
 	  // Now put all the triplets in the list
 	  for (size_t k=0; k < trip.size(); ++k) {
-	    p3 = t1.pixel_list()[trip[k]];
-	    if (calculate_orientation (v[p1], v[p2], v[p3]) > 0)
-	      add (p1, p2, p3);
+	    if (calculate_orientation (v[i1], v[i2], v[trip[k]]) > 0)
+	      add (p1, p2, t1.pixel_list(trip[k]));
 	    else
-	      add (p2, p1, p3);
+	      add (p2, p1, t1.pixel_list(trip[k]));
 	  }
 	}
       }
@@ -309,10 +309,10 @@ namespace Npoint_Functions {
 
       for (size_t j1=0; j1 < t.Npix(); ++j1) {
 	i1 = j1; // to make the code look symmetric
-	p1 = t.pixel_list()[i1];
+	p1 = t.pixel_list(i1);
 	for (size_t j2=0; (j2 < t.Nmax()) && (t(j1,j2) != -1); ++j2) {
 	  i2 = t(j1,j2);
-	  p2 = t.pixel_list()[i2];
+	  p2 = t.pixel_list(i2);
 	  if (p2 < p1) continue;
 	  // Finally can search for and add appropriate pairs.
 	  trip.clear();
@@ -321,9 +321,9 @@ namespace Npoint_Functions {
 	  // Now put all the triplets in the list
 	  for (size_t k=0; k < trip.size(); ++k) {
 	    if (calculate_orientation (v[i1], v[i2], v[trip[k]]) > 0)
-	      add (p1, p2, t.pixel_list()[trip[k]]);
+	      add (p1, p2, t.pixel_list(trip[k]));
 	    else
-	      add (p2, p1, t.pixel_list()[trip[k]]);
+	      add (p2, p1, t.pixel_list(trip[k]));
 	  }
 	}
       }
