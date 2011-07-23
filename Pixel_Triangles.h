@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.9 2011-07-23 01:16:55 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.10 2011-07-23 01:51:46 copi Exp $");
   /// @endcond
 }
 
@@ -28,6 +28,50 @@ namespace {
     for (size_t i=0; i < t.Npix(); ++i) {
       veclist[i] = HBase.pix2vec (t.pixel_list(i));
     }
+  }
+
+    /** Find matches in two lists and append them to a new list. */
+  template<typename T>
+  void append_matches (const T *L1, size_t NL1, const T *L2, size_t NL2,
+		       std::vector<T>& res)
+  {
+    const T *it1, *it2; // "iterators"
+    
+    it1 = L1;
+    it2 = L2;
+    
+    /* Now loop over the iterators storing matches
+     * Since the lists are monotonically increasing and -1 padded at the end
+     * a simple linear search is an efficient algorithm.
+     */
+    while ( (it1 != &L1[NL1]) && (it2 != &L2[NL2])
+	    && (*it1 != -1) && (*it2 != -1) ) {
+      if (*it1 == *it2) {
+	res.push_back (*it1);
+	++it1;
+	++it2;
+      } else if (*it1 < *it2) {
+	++it1;
+      } else {
+	++it2;
+      }
+    }
+  }
+
+  /** Find matches in two lists and append them to a new list.
+   *  Here the minimum allowed value is provided.  All values appended to the
+   *  list will be greater than or equal to this value. */
+  template<typename T>
+  void append_matches (T minval, const T *L1, size_t NL1,
+		       const T *L2, size_t NL2,
+		       std::vector<T>& res)
+  {
+    const T *it1, *it2; // "iterators"
+    it1 = L1;
+    while ((it1 != &L1[NL1]) && (*it1 < minval)) ++it1;
+    it2 = L2;
+    while ((it2 != &L2[NL2]) && (*it2 < minval)) ++it2;
+    append_matches (it1, NL1, it2, NL2, res);
   }
 }
 
@@ -60,33 +104,6 @@ namespace Npoint_Functions {
       return ((val > 0) ? +1 : -1);
     }
   
-    /** Find matches in two lists and append them to a new list. */
-    void append_matches (const T *L1, size_t NL1, const T *L2, size_t NL2,
-			 std::vector<T>& res)
-    {
-      const T *it1, *it2; // "iterators"
-    
-      it1 = L1;
-      it2 = L2;
-    
-      /* Now loop over the iterators storing matches
-       * Since the lists are monotonically increasing and -1 padded at the end
-       * a simple linear search is an efficient algorithm.
-       */
-      while ( (it1 != &L1[NL1]) && (it2 != &L2[NL2])
-	      && (*it1 != -1) && (*it2 != -1) ) {
-	if (*it1 == *it2) {
-	  res.push_back (*it1);
-	  ++it1;
-	  ++it2;
-	} else if (*it1 < *it2) {
-	  ++it1;
-	} else {
-	  ++it2;
-	}
-      }
-    }
-
     /// Add a triangle to the list.
     inline void add (const T& p1, const T& p2, const T& p3)
     {
@@ -231,8 +248,8 @@ namespace Npoint_Functions {
 	  p2 = t2.pixel_list(i2);
 	  // Finally can search for and add appropriate pairs.
 	  trip.clear();
-	  this->append_matches (&t1(i1,0), t1.Nmax(), &t1(i2,0), t1.Nmax(),
-				trip);
+	  append_matches (&t1(i1,0), t1.Nmax(), &t1(i2,0), t1.Nmax(),
+			  trip);
 	  // Now put all the triplets in the list
 	  for (size_t k=0; k < trip.size(); ++k) {
 	    if (calculate_orientation (v[i1], v[i2], v[trip[k]]) > 0)
@@ -255,37 +272,6 @@ namespace Npoint_Functions {
    */
   template<typename T>
   class Pixel_Triangles_Equilateral : public Pixel_Triangles_Isosceles<T> {
-  protected :
-    /** Find matches in two lists and append them to a new list.
-     *  Here the minimum allowed value is provided.  All values appended to the
-     *  list will be greater than or equal to this value. */
-    void append_matches (T minval, const T *L1, size_t NL1,
-                         const T *L2, size_t NL2,
-                         std::vector<T>& res)
-    {
-      const T *it1, *it2; // "iterators"
-      it1 = L1;
-      while ((it1 != &L1[NL1]) && (*it1 < minval)) ++it1;
-      it2 = L2;
-      while ((it2 != &L2[NL2]) && (*it2 < minval)) ++it2;
-
-      /* Now loop over the iterators storing matches
-       * Since the lists are monotonically increasing and -1 padded at the end
-       * a simple linear search is an efficient algorithm.
-       */
-      while ( (it1 != &L1[NL1]) && (it2 != &L2[NL2])
-              && (*it1 != -1) && (*it2 != -1) ) {
-        if (*it1 == *it2) {
-          res.push_back (*it1);
-          ++it1;
-          ++it2;
-        } else if (*it1 < *it2) {
-          ++it1;
-        } else {
-          ++it2;
-        }
-      }
-    }
   public :
     /// Generic constructor.
     Pixel_Triangles_Equilateral () : Pixel_Triangles_Isosceles<T>() {}
@@ -332,6 +318,7 @@ namespace Npoint_Functions {
     }
   };
 }
+
 #endif
 
 /* For emacs, this is a c++ header
