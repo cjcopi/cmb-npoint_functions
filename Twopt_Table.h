@@ -17,7 +17,7 @@
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.16 2011-07-17 13:39:33 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.17 2011-07-20 18:34:01 copi Exp $");
   /// @endcond
 }
 
@@ -270,6 +270,8 @@ namespace Npoint_Functions {
     inline double bin_value () const { return cosbin; }
     /// The list of pixels.
     inline const std::vector<T>& pixel_list () const { return pixlist; }
+    /// A particular pixel from the list.
+    inline const T& pixel_list (size_t ind) const { return pixlist[ind]; }
     /// The number of pixels.
     inline size_t Npix() const { return pixlist.size(); }
     /// The HEALPix resolution of the table.
