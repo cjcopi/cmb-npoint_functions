@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.11 2011-07-23 02:03:51 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.12 2011-07-23 02:05:57 copi Exp $");
   /// @endcond
 }
 
@@ -86,23 +86,25 @@ namespace Npoint_Functions {
    */
   template<typename T>
   class Pixel_Triangles {
+  public :
+    enum Orientation { RIGHTHANDED, LEFTHANDED };
   private :
     std::vector<std::vector<T> > triangles; // List of pixels in triangle.
     std::vector<double> edge_length; // Length of triangle edges.
   protected :
      /// Orientation of the triangles.
-    std::vector<int> orient;
+    std::vector<Orientation> orient;
 
     /** Calculate the orientation from three vectors.
      *  The orientation is an integer:  +1 for righthanded and -1 for lefthanded.
      *  Righthanded is defined by 
      *  \f[ (\hat n_1\times\hat n_2)\cdot \hat n_3 > 0. \f]
      */
-    int calculate_orientation (const vec3& n1, const vec3& n2,
-			       const vec3& n3)
+    Orientation calculate_orientation (const vec3& n1, const vec3& n2,
+				       const vec3& n3)
     {
       double val = dotprod (crossprod (n1, n2), n3);
-      return ((val > 0) ? +1 : -1);
+      return ((val > 0) ? this->RIGHTHANDED : this->LEFTHANDED);
     }
   
     /// Add a triangle to the list.
@@ -193,7 +195,7 @@ namespace Npoint_Functions {
      *  lefthanded triangles.  See calculate_orientation() for more
      *  details. 
      */
-    inline int orientation (size_t j) const
+    inline Orientation orientation (size_t j) const
     { return orient[j]; }
     /** The edge lengths of the triangles.
      *  The edge lengths are the dot products between the vectors to the
@@ -261,7 +263,7 @@ namespace Npoint_Functions {
 	}
       }
       // All triangles are righthanded.
-      this->orient.assign (this->size(), 1);
+      this->orient.assign (this->size(), this->RIGHTHANDED);
     }
   };
 
@@ -315,7 +317,7 @@ namespace Npoint_Functions {
 	}
       }
       // All triangles are righthanded.
-      this->orient.assign (this->size(), 1);
+      this->orient.assign (this->size(), this->RIGHTHANDED);
     }
   };
 }
