@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.5 2011-07-15 16:16:23 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.6 2011-07-20 21:08:07 copi Exp $");
   /// @endcond
 }
 
@@ -139,7 +139,7 @@ namespace Npoint_Functions {
 
       for (size_t j1=0; j1 < t1.Npix(); ++j1) {
 	i1 = j1; // to make the code look symmetric
-	p1 = t1.pixel_list()[j1];
+	p1 = t1.pixel_list()[i1];
 	for (size_t j2=0; (j2 < t1.Nmax()) && (t1(j1,j2) != -1); ++j2) {
 	  i2 = t1(j1,j2);
 	  p2 = t1.pixel_list()[i2];
@@ -224,7 +224,7 @@ namespace Npoint_Functions {
 
       for (size_t j1=0; j1 < t2.Npix(); ++j1) {
 	i1 = j1; // to make the code look symmetric
-	p1 = t1.pixel_list()[j1];
+	p1 = t1.pixel_list()[i1];
 	for (size_t j2=0; (j2 < t2.Nmax()) && (t2(j1,j2) != -1); ++j2) {
 	  i2 = t2(j1,j2);
 	  p2 = t2.pixel_list()[i2];
@@ -308,7 +308,7 @@ namespace Npoint_Functions {
 
       for (size_t j1=0; j1 < t.Npix(); ++j1) {
 	i1 = j1; // to make the code look symmetric
-	p1 = t.pixel_list()[j1];
+	p1 = t.pixel_list()[i1];
 	for (size_t j2=0; (j2 < t.Nmax()) && (t(j1,j2) != -1); ++j2) {
 	  i2 = t(j1,j2);
 	  p2 = t.pixel_list()[i2];
