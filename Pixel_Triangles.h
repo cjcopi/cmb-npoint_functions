@@ -10,12 +10,12 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.10 2011-07-23 01:51:46 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.11 2011-07-23 02:03:51 copi Exp $");
   /// @endcond
 }
 
 namespace {
-  /** Helper function to create a list of vectors pointing to HEALPix pixel
+  /* Helper function to create a list of vectors pointing to HEALPix pixel
    *  centers.  The vectors are labelled by the pixel INDEX in the
    *  two point table, not the actual pixel number.
    */
@@ -58,7 +58,7 @@ namespace {
     }
   }
 
-  /** Find matches in two lists and append them to a new list.
+  /* Find matches in two lists and append them to a new list.
    *  Here the minimum allowed value is provided.  All values appended to the
    *  list will be greater than or equal to this value. */
   template<typename T>
@@ -90,7 +90,8 @@ namespace Npoint_Functions {
     std::vector<std::vector<T> > triangles; // List of pixels in triangle.
     std::vector<double> edge_length; // Length of triangle edges.
   protected :
-    std::vector<int> orient; // Orientation of the triangle.
+     /// Orientation of the triangles.
+    std::vector<int> orient;
 
     /** Calculate the orientation from three vectors.
      *  The orientation is an integer:  +1 for righthanded and -1 for lefthanded.
