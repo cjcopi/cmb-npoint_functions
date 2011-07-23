@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.6 2011-07-20 21:08:07 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.7 2011-07-23 01:00:31 copi Exp $");
   /// @endcond
 }
 
@@ -212,7 +212,7 @@ namespace Npoint_Functions {
     void find_triangles (const Twopt_Table<T>& t1,
 			 const Twopt_Table<T>& t2)
     {
-      T p1, p2;
+      T p1, p2, p3;
       T i1, i2;
       std::vector<T> trip;
       this->reset();
@@ -224,8 +224,8 @@ namespace Npoint_Functions {
 
       for (size_t j1=0; j1 < t2.Npix(); ++j1) {
 	i1 = j1; // to make the code look symmetric
-	p1 = t1.pixel_list()[i1];
-	for (size_t j2=0; (j2 < t2.Nmax()) && (t2(j1,j2) != -1); ++j2) {
+	p1 = t2.pixel_list()[i1];
+	for (size_t j2=j1+1; (j2 < t2.Nmax()) && (t2(j1,j2) != -1); ++j2) {
 	  i2 = t2(j1,j2);
 	  p2 = t2.pixel_list()[i2];
 	  // Finally can search for and add appropriate pairs.
@@ -234,10 +234,11 @@ namespace Npoint_Functions {
 				trip);
 	  // Now put all the triplets in the list
 	  for (size_t k=0; k < trip.size(); ++k) {
-	    if (calculate_orientation (v[i1], v[i2], v[trip[k]]) > 0)
-	      add (p1, p2, t1.pixel_list()[trip[k]]);
+	    p3 = t1.pixel_list()[trip[k]];
+	    if (calculate_orientation (v[p1], v[p2], v[p3]) > 0)
+	      add (p1, p2, p3);
 	    else
-	      add (p2, p1, t1.pixel_list()[trip[k]]);
+	      add (p2, p1, p3);
 	  }
 	}
       }
