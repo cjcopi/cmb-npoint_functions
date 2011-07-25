@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.14 2011-07-23 02:17:22 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.15 2011-07-23 15:27:28 copi Exp $");
   /// @endcond
 }
 
@@ -252,13 +252,18 @@ namespace Npoint_Functions {
 	for (size_t j2=0; (j2 < t2.Nmax()) && (t2(j1,j2) != -1); ++j2) {
 	  i2 = t2(j1,j2);
 	  p2 = t2.pixel_list(i2);
+	  if (p2 < p1) continue; // Don't double count triangles.
 	  // Finally can search for and add appropriate pairs.
 	  trip.clear();
 	  append_matches (&t1(i1,0), t1.Nmax(), &t1(i2,0), t1.Nmax(),
 			  trip);
-	  // Now put all the triplets in the list
+	  /* Now put all the triplets in the list making sure the triangles
+	   * are righthanded.  The first two pixels are swapped if the
+	   * given orientation is lefthanded.
+	   */
 	  for (size_t k=0; k < trip.size(); ++k) {
-	    if (calculate_orientation (v[i1], v[i2], v[trip[k]]) > 0)
+	    if (calculate_orientation (v[i1], v[i2], v[trip[k]]) 
+		== RIGHTHANDED)
 	      add (p1, p2, t1.pixel_list(trip[k]));
 	    else
 	      add (p2, p1, t1.pixel_list(trip[k]));
@@ -272,7 +277,8 @@ namespace Npoint_Functions {
 
   /** Storage for equilateral pixel triangles.
    *  Only the unique triangles are stored.  The pixels are stored as to
-   *  ensure that the triangles are righthanded.
+   *  ensure that the triangles are righthanded and that the first pixel
+   *  has the smallest index.
    *
    *  This is a specialized version of Pixel_Triangles_Isosceles.
    */
@@ -310,17 +316,64 @@ namespace Npoint_Functions {
 	  trip.clear();
 	  append_matches (i2, &t(i1,0), t.Nmax(), &t(i2,0), t.Nmax(),
 			  trip);
-	  // Now put all the triplets in the list
+	  /* Now put all the triplets in the list making sure the triangles
+	   * are righthanded.  The last two pixels are swapped if the
+	   * given orientation is lefthanded.
+	   */
 	  for (size_t k=0; k < trip.size(); ++k) {
-	    if (calculate_orientation (v[i1], v[i2], v[trip[k]]) > 0)
+	    if (calculate_orientation (v[i1], v[i2], v[trip[k]]) 
+		== RIGHTHANDED)
 	      add (p1, p2, t.pixel_list(trip[k]));
 	    else
-	      add (p2, p1, t.pixel_list(trip[k]));
+	      add (p1, t.pixel_list(trip[k]), p2);
 	  }
 	}
       }
       // All triangles are righthanded.
       this->orient.assign (this->size(), RIGHTHANDED);
+    }
+  };
+
+  // Temporary location?
+  /** Calculate all quadrilaterals.  This is specialized to Isosceles
+   * triangles and only calculates equilateral quadrilaterals.  We use the
+   * fact that the pixels in the triangle are stored such that the triangles
+   * are righthanded.  We further use the fact that min(pix1, pix2) will
+   * be monotonically increasing, thus we can truncate the search.
+   *
+   * Even with this specialization the quad table can be huge.  For this
+   * reason we create a class that incrementally calculates sets of points.
+   * This costs more in overhead but requires significantly less memory.
+   */
+  template<typename T>
+  class Quads {
+  private :
+    size_t ind_curr;
+    Pixel_Triangles_Isosceles<T> *t;
+    std::vector<T> pts; // So we don't have to keep recreating it.
+  public :  
+    Quads () : ind_curr(0), t(0), pts(4) {}
+    void initialize (Pixel_Triangles_Isosceles<T>& triangle)
+    { ind_curr = 0; t = &triangle; }
+    bool next (std::vector<std::vector<T> >& quads)
+    {
+      if (ind_curr == t->size()) return false;
+      quads.clear();
+      T min1, min2;
+      // Order of pts doesn't matter.
+      std::copy ((*t)(ind_curr).begin(), (*t)(ind_curr).end(), pts.begin());
+      min1 = std::min ((*t)(ind_curr)[0], (*t)(ind_curr)[1]);
+      for (size_t jj=ind_curr+1; jj < t->size(); ++jj) {
+	min2 = std::min ((*t)(jj)[0], (*t)(jj)[1]);
+	if (min2 > min1) break;
+	if (((*t)(ind_curr)[0] == (*t)(jj)[1])
+	    && ((*t)(ind_curr)[1] == (*t)(jj)[0])) {
+	  pts[3] = (*t)(jj)[2];
+	  quads.push_back (pts);
+	}
+      }
+      ++ind_curr;
+      return true;
     }
   };
 }
