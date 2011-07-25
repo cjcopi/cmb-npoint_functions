@@ -15,9 +15,10 @@
 
 namespace {
   const std::string CALCULATE_QUADRILATERAL_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_isosceles_threept_correlation_function.cpp,v 1.3 2011-07-16 23:52:38 copi Exp $");
+  ("$Id: calculate_equilateral_fourpt_correlation_function.cpp,v 1.1 2011-07-23 01:53:22 copi Exp $");
 }
 
+#if 0
 /* Calculate all quadrilaterals.  This is specialized to Isosceles
  * triangles and only calculates equilateral quadrilaterals.  We use the
  * fact that the pixels in the triangle are stored such that the triangles
@@ -60,6 +61,7 @@ public :
     return true;
   }
 };
+#endif
 
 
 void usage (const char *progname)
@@ -95,7 +97,7 @@ int main (int argc, char *argv[])
     Npoint_Functions::Twopt_Table<int> twopt_table;
     Npoint_Functions::Pixel_Triangles_Isosceles<int> triangles;
     std::vector<std::vector<int> > quads;
-    Quads<int> q;
+    Npoint_Functions::Quads<int> q;
 
 #pragma omp for schedule(dynamic,2)
     for (size_t k=0; k < twopt_table_file.size(); ++k) {
