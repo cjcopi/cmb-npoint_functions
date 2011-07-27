@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string NPOINT_FUNCTIONS_UTILS_RCSID
-  ("$Id: Npoint_Functions_Utils.h,v 1.2 2011-07-16 23:52:38 copi Exp $");
+  ("$Id: Npoint_Functions_Utils.h,v 1.3 2011-07-17 03:11:28 copi Exp $");
   /// @endcond
 }
 
@@ -82,6 +82,22 @@ namespace Npoint_Functions {
   {
     std::istringstream iss(instr);
     return !(iss >> val).fail();
+  }
+
+  /** Fill a list with HEALpix vectors.
+   *  Helper function to create a list of vectors pointing to HEALPix pixel
+   *  centers.  The vectors are labelled by the pixel INDEX in the two
+   *  point table, not the actual pixel number.
+   */
+  template<typename T>
+  void fill_vector_list (const Npoint_Functions::Twopt_Table<T>& t,
+			 std::vector<vec3>& veclist)
+  {
+    Healpix_Base HBase (t.Nside(), NEST, SET_NSIDE);
+    veclist.resize (t.Npix());
+    for (size_t i=0; i < t.Npix(); ++i) {
+      veclist[i] = HBase.pix2vec (t.pixel_list(i));
+    }
   }
 
   /** Generate a range of values.
