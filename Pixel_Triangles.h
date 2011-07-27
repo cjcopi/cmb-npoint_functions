@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.18 2011-07-27 03:50:38 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.19 2011-07-27 04:01:44 copi Exp $");
   /// @endcond
 }
 
@@ -188,6 +188,14 @@ namespace Npoint_Functions {
      */
     inline const std::vector<T>& operator() (size_t j) const
     { return triangles[j]; }
+    /** The three pixels that are the corners of the requested triangle.
+     *  This value cannot (should not) be changed.
+     */
+    inline const std::vector<T>& get (size_t j) const
+    { return triangles[j]; }
+    /** Pixel index \a j of triangle \a i. */
+    inline T get (size_t i, size_t j) const
+    { return triangles[i][j]; }
     /** The Orientation of the triangle.
      *   See calculate_orientation() for more details. 
      */
@@ -354,14 +362,14 @@ namespace Npoint_Functions {
       quads.clear();
       T min1, min2;
       // Order of pts doesn't matter.
-      std::copy ((*t)(ind_curr).begin(), (*t)(ind_curr).end(), pts.begin());
-      min1 = std::min ((*t)(ind_curr)[0], (*t)(ind_curr)[1]);
+      std::copy (t->get(ind_curr).begin(), t->get(ind_curr).end(), pts.begin());
+      min1 = std::min (t->get(ind_curr,0), t->get(ind_curr,1));
       for (size_t jj=ind_curr+1; jj < t->size(); ++jj) {
-	min2 = std::min ((*t)(jj)[0], (*t)(jj)[1]);
+	min2 = std::min (t->get(jj,0), t->get(jj,1));
 	if (min2 > min1) break;
-	if (((*t)(ind_curr)[0] == (*t)(jj)[1])
-	    && ((*t)(ind_curr)[1] == (*t)(jj)[0])) {
-	  pts[3] = (*t)(jj)[2];
+	if ((t->get(ind_curr,0) == t->get(jj,1))
+	    && (t->get(ind_curr,1) == t->get(jj,0))) {
+	  pts[3] = t->get(jj,2);
 	  quads.push_back (pts);
 	}
       }

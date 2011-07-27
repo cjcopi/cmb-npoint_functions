@@ -16,53 +16,8 @@
 
 namespace {
   const std::string CALCULATE_QUADRILATERAL_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_equilateral_fourpt_correlation_function.cpp,v 1.2 2011-07-25 22:13:36 copi Exp $");
+  ("$Id: calculate_equilateral_fourpt_correlation_function.cpp,v 1.3 2011-07-27 03:40:25 copi Exp $");
 }
-
-#if 0
-/* Calculate all quadrilaterals.  This is specialized to Isosceles
- * triangles and only calculates equilateral quadrilaterals.  We use the
- * fact that the pixels in the triangle are stored such that the triangles
- * are righthanded.  We further use the fact that min(pix1, pix2) will
- * be monotonically increasing, thus we can truncate the search.
- *
- * Even with this specialization the quad table can be huge.  For this
- * reason we create a class that incrementally calculates sets of points.
- * This costs more in overhead but requires significantly less memory.
- */
-template<typename T>
-class Quads {
-private :
-  size_t ind_curr;
-  Npoint_Functions::Pixel_Triangles_Isosceles<T> *t;
-  std::vector<T> pts; // So we don't have to keep recreating it.
-public :  
-  Quads () : ind_curr(0), t(0), pts(4) {}
-  void initialize (Npoint_Functions::Pixel_Triangles_Isosceles<T>&
-		   triangle)
-  { ind_curr = 0; t = &triangle; }
-  bool next (std::vector<std::vector<T> >& quads)
-  {
-    if (ind_curr == t->size()) return false;
-    quads.clear();
-    T min1, min2;
-    // Order of pts doesn't matter.
-    std::copy ((*t)(ind_curr).begin(), (*t)(ind_curr).end(), pts.begin());
-    min1 = std::min ((*t)(ind_curr)[0], (*t)(ind_curr)[1]);
-    for (size_t jj=ind_curr+1; jj < t->size(); ++jj) {
-      min2 = std::min ((*t)(jj)[0], (*t)(jj)[1]);
-      if (min2 > min1) break;
-      if (((*t)(ind_curr)[0] == (*t)(jj)[1])
-	  && ((*t)(ind_curr)[1] == (*t)(jj)[0])) {
-	pts[3] = (*t)(jj)[2];
-	quads.push_back (pts);
-      }
-    }
-    ++ind_curr;
-    return true;
-  }
-};
-#endif
 
 
 void usage (const char *progname)
