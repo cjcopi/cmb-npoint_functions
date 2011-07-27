@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <cmath>
 
 #ifdef OMP
 #include <omp.h>
@@ -15,7 +16,7 @@
 
 namespace {
   const std::string CALCULATE_QUADRILATERAL_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_equilateral_fourpt_correlation_function.cpp,v 1.1 2011-07-23 01:53:22 copi Exp $");
+  ("$Id: calculate_equilateral_fourpt_correlation_function.cpp,v 1.2 2011-07-25 22:13:36 copi Exp $");
 }
 
 #if 0
@@ -113,11 +114,19 @@ int main (int argc, char *argv[])
       }
 
       twopt_table_equal.read_file (twopt_table_file[k]);
+      bin_list[k] = twopt_table_equal.bin_value();
       C4 = 0;
       Nquads = 0;
       // Now loop over the bins again so we get the unequal bin length.
       for (size_t kk=0; kk < twopt_table_file.size(); ++kk) {
 	twopt_table.read_file (twopt_table_file[kk]);
+	/* Triangles can only be formed if this side is less than or equal
+	 * to twice the equal length side.  No point in going through the
+	 * work for triangles that cannot exist.
+	 */
+	if (2*std::acos(twopt_table_equal.bin_value())
+	    < std::acos(twopt_table.bin_value()))
+	  continue;
 	triangles.find_triangles (twopt_table_equal, twopt_table);
 	q.initialize (triangles);
 	while (q.next(quads)) {
@@ -128,7 +137,6 @@ int main (int argc, char *argv[])
 	  Nquads += quads.size();
 	}
       }
-      bin_list[k] = triangles.lengths()[1];
       if (Nquads != 0) C4 /= Nquads;
       Corr[k] = C4;
     }
