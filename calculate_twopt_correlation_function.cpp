@@ -7,10 +7,11 @@
 #include <healpix_map_fitsio.h>
 
 #include <Twopt_Table.h>
+#include <Npoint_Functions_Utils.h>
 
 namespace {
   const std::string CALCULATE_TWOPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_twopt_correlation_function.cpp,v 1.6 2011-07-10 02:43:47 copi Exp $");
+  ("$Id: calculate_twopt_correlation_function.cpp,v 1.7 2011-07-15 16:16:23 copi Exp $");
 }
 
 
@@ -33,20 +34,8 @@ int main (int argc, char *argv[])
   if (map.Scheme() == RING) map.swap_scheme();
 
   // Figure out how many bins there are by trying to open files.
-  std::vector<std::string> twopt_table_file;
-  {
-    int Nbin = 0;
-    std::ostringstream sstr;
-    Npoint_Functions::Twopt_Table<int> tp;
-    while (true) {
-      sstr.str("");
-      sstr << twopt_prefix << std::setw(5) << std::setfill('0') << Nbin
-           << ".dat";
-      if (! tp.read_file_header (sstr.str())) break;
-      twopt_table_file.push_back (sstr.str());
-      ++Nbin;
-    }
-  }
+  std::vector<std::string> twopt_table_file
+    = Npoint_Functions::get_sequential_file_list (twopt_prefix);
 
   std::vector<double> bin_list(twopt_table_file.size());
   std::vector<double> Corr(twopt_table_file.size());
