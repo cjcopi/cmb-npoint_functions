@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.15 2011-07-23 15:27:28 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.16 2011-07-25 22:13:15 copi Exp $");
   /// @endcond
 }
 
@@ -233,30 +233,32 @@ namespace Npoint_Functions {
      *  sides.  The first two pixels in the table come from \a t2 and their
      *  order is set by ensuring that the triangle is righthanded.
      */
-    void find_triangles (const Twopt_Table<T>& t1,
-			 const Twopt_Table<T>& t2)
+    void find_triangles (const Twopt_Table<T>& tequal,
+			 const Twopt_Table<T>& tother)
     {
       T p1, p2;
       T i1, i2;
       std::vector<T> trip;
       this->reset();
-      set_edge_lengths (t2.bin_value(), t1.bin_value(), t1.bin_value());
+      set_edge_lengths (tother.bin_value(), tequal.bin_value(),
+			tequal.bin_value());
 
       // Create list of vectors so we can get the orientation.
       std::vector<vec3> v;
-      fill_vector_list (t1, v);
+      fill_vector_list (tequal, v);
 
-      for (size_t j1=0; j1 < t2.Npix(); ++j1) {
+      for (size_t j1=0; j1 < tother.Npix(); ++j1) {
 	i1 = j1; // to make the code look symmetric
-	p1 = t2.pixel_list(i1);
-	for (size_t j2=0; (j2 < t2.Nmax()) && (t2(j1,j2) != -1); ++j2) {
-	  i2 = t2(j1,j2);
-	  p2 = t2.pixel_list(i2);
+	p1 = tother.pixel_list(i1);
+	for (size_t j2=0; (j2 < tother.Nmax()) && (tother(j1,j2) != -1);
+	     ++j2) {
+	  i2 = tother(j1,j2);
+	  p2 = tother.pixel_list(i2);
 	  if (p2 < p1) continue; // Don't double count triangles.
 	  // Finally can search for and add appropriate pairs.
 	  trip.clear();
-	  append_matches (&t1(i1,0), t1.Nmax(), &t1(i2,0), t1.Nmax(),
-			  trip);
+	  append_matches (&tequal(i1,0), tequal.Nmax(),
+			  &tequal(i2,0), tequal.Nmax(), trip);
 	  /* Now put all the triplets in the list making sure the triangles
 	   * are righthanded.  The first two pixels are swapped if the
 	   * given orientation is lefthanded.
@@ -264,9 +266,9 @@ namespace Npoint_Functions {
 	  for (size_t k=0; k < trip.size(); ++k) {
 	    if (calculate_orientation (v[i1], v[i2], v[trip[k]]) 
 		== RIGHTHANDED)
-	      add (p1, p2, t1.pixel_list(trip[k]));
+	      add (p1, p2, tequal.pixel_list(trip[k]));
 	    else
-	      add (p2, p1, t1.pixel_list(trip[k]));
+	      add (p2, p1, tequal.pixel_list(trip[k]));
 	  }
 	}
       }
