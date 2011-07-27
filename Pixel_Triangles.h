@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.16 2011-07-25 22:13:15 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.17 2011-07-27 03:43:30 copi Exp $");
   /// @endcond
 }
 
@@ -31,20 +31,16 @@ namespace {
   }
 
     /** Find matches in two lists and append them to a new list. */
-  template<typename T>
-  void append_matches (const T *L1, size_t NL1, const T *L2, size_t NL2,
+  template<class IteratorType, typename T>
+  void append_matches (IteratorType it1, IteratorType it1end,
+		       IteratorType it2, IteratorType it2end,
 		       std::vector<T>& res)
   {
-    const T *it1, *it2; // "iterators"
-    
-    it1 = L1;
-    it2 = L2;
-    
-    /* Now loop over the iterators storing matches
+    /* Loop over the iterators storing matches.
      * Since the lists are monotonically increasing and -1 padded at the end
      * a simple linear search is an efficient algorithm.
      */
-    while ( (it1 != &L1[NL1]) && (it2 != &L2[NL2])
+    while ( (it1 != it1end) && (it2 != it2end)
 	    && (*it1 != -1) && (*it2 != -1) ) {
       if (*it1 == *it2) {
 	res.push_back (*it1);
@@ -57,21 +53,19 @@ namespace {
       }
     }
   }
-
+  
   /* Find matches in two lists and append them to a new list.
    *  Here the minimum allowed value is provided.  All values appended to the
    *  list will be greater than or equal to this value. */
-  template<typename T>
-  void append_matches (T minval, const T *L1, size_t NL1,
-		       const T *L2, size_t NL2,
+  template<class IteratorType, typename T>
+  void append_matches (T minval,
+		       IteratorType it1, IteratorType it1end,
+		       IteratorType it2, IteratorType it2end,
 		       std::vector<T>& res)
   {
-    const T *it1, *it2; // "iterators"
-    it1 = L1;
-    while ((it1 != &L1[NL1]) && (*it1 < minval)) ++it1;
-    it2 = L2;
-    while ((it2 != &L2[NL2]) && (*it2 < minval)) ++it2;
-    append_matches (it1, NL1, it2, NL2, res);
+    while ((it1 != it1end) && (*it1 < minval)) ++it1;
+    while ((it2 != it2end) && (*it2 < minval)) ++it2;
+    append_matches (it1, it1end, it2, it2end, res);
   }
 }
 
@@ -171,8 +165,8 @@ namespace Npoint_Functions {
 	  p2 = t1.pixel_list(i2);
 	  // Finally can search for and add appropriate pairs.
 	  trip.clear();
-	  append_matches (&t2(i1,0), t2.Nmax(), &t3(i2,0), t3.Nmax(),
-			  trip);
+	  append_matches (&t2(i1,0), &t2(i1,t2.Nmax()),
+			  &t3(i2,0), &t3(i2,t3.Nmax()), trip);
 	  // Now put all the triplets in the list
 	  for (size_t k=0; k < trip.size(); ++k) {
 	    add (p1, p2, t1.pixel_list(trip[k]));
@@ -257,8 +251,8 @@ namespace Npoint_Functions {
 	  if (p2 < p1) continue; // Don't double count triangles.
 	  // Finally can search for and add appropriate pairs.
 	  trip.clear();
-	  append_matches (&tequal(i1,0), tequal.Nmax(),
-			  &tequal(i2,0), tequal.Nmax(), trip);
+	  append_matches (&tequal(i1,0), &tequal(i1,tequal.Nmax()),
+			  &tequal(i2,0), &tequal(i2,tequal.Nmax()), trip);
 	  /* Now put all the triplets in the list making sure the triangles
 	   * are righthanded.  The first two pixels are swapped if the
 	   * given orientation is lefthanded.
@@ -316,8 +310,8 @@ namespace Npoint_Functions {
 	  if (p2 < p1) continue;
 	  // Finally can search for and add appropriate pairs.
 	  trip.clear();
-	  append_matches (i2, &t(i1,0), t.Nmax(), &t(i2,0), t.Nmax(),
-			  trip);
+	  append_matches (i2, &t(i1,0), &t(i1,t.Nmax()),
+			  &t(i2,0), &t(i2,t.Nmax()), trip);
 	  /* Now put all the triplets in the list making sure the triangles
 	   * are righthanded.  The last two pixels are swapped if the
 	   * given orientation is lefthanded.
