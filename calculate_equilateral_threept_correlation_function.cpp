@@ -10,7 +10,7 @@
 
 namespace {
   const std::string CALCULATE_EQUILATERAL_THREEPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_equilateral_threept_correlation_function.cpp,v 1.4 2011-07-14 17:35:45 copi Exp $");
+  ("$Id: calculate_equilateral_threept_correlation_function.cpp,v 1.5 2011-07-15 16:16:23 copi Exp $");
 }
 
 
@@ -54,8 +54,8 @@ int main (int argc, char *argv[])
       triangles.find_triangles (twopt_table);
       C3 = 0;
       for (size_t j=0; j < triangles.size(); ++j) {
-	C3 += map[triangles(j)[0]] * map[triangles(j)[1]]
-	  * map[triangles(j)[2]];
+	C3 += map[triangles.get(j,0)] * map[triangles.get(j,1)]
+	  * map[triangles.get(j,2)];
       }
       if (triangles.size() != 0) C3 /= triangles.size();
       bin_list[k] = triangles.lengths()[0];
