@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.17 2011-07-27 03:43:30 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.18 2011-07-27 03:50:38 copi Exp $");
   /// @endcond
 }
 
@@ -146,7 +146,7 @@ namespace Npoint_Functions {
 			 const Twopt_Table<T>& t3)
     {
       T p1, p2;
-      T i1, i2;
+      T i2;
       std::vector<T> trip;
       this->reset();
       set_edge_lengths (t1.bin_value(), t2.bin_value(), t3.bin_value());
@@ -157,11 +157,10 @@ namespace Npoint_Functions {
       fill_vector_list (t1, v);
       orient.clear();
 
-      for (size_t j1=0; j1 < t1.Npix(); ++j1) {
-	i1 = j1; // to make the code look symmetric
+      for (size_t i1=0; i1 < t1.Npix(); ++i1) {
 	p1 = t1.pixel_list(i1);
-	for (size_t j2=0; (j2 < t1.Nmax()) && (t1(j1,j2) != -1); ++j2) {
-	  i2 = t1(j1,j2);
+	for (size_t j2=0; (j2 < t1.Nmax()) && (t1(i1,j2) != -1); ++j2) {
+	  i2 = t1(i1,j2);
 	  p2 = t1.pixel_list(i2);
 	  // Finally can search for and add appropriate pairs.
 	  trip.clear();
@@ -231,7 +230,7 @@ namespace Npoint_Functions {
 			 const Twopt_Table<T>& tother)
     {
       T p1, p2;
-      T i1, i2;
+      T i2;
       std::vector<T> trip;
       this->reset();
       set_edge_lengths (tother.bin_value(), tequal.bin_value(),
@@ -241,12 +240,11 @@ namespace Npoint_Functions {
       std::vector<vec3> v;
       fill_vector_list (tequal, v);
 
-      for (size_t j1=0; j1 < tother.Npix(); ++j1) {
-	i1 = j1; // to make the code look symmetric
+      for (size_t i1=0; i1 < tother.Npix(); ++i1) {
 	p1 = tother.pixel_list(i1);
-	for (size_t j2=0; (j2 < tother.Nmax()) && (tother(j1,j2) != -1);
+	for (size_t j2=0; (j2 < tother.Nmax()) && (tother(i1,j2) != -1);
 	     ++j2) {
-	  i2 = tother(j1,j2);
+	  i2 = tother(i1,j2);
 	  p2 = tother.pixel_list(i2);
 	  if (p2 < p1) continue; // Don't double count triangles.
 	  // Finally can search for and add appropriate pairs.
@@ -292,7 +290,7 @@ namespace Npoint_Functions {
     void find_triangles (const Twopt_Table<T>& t)
     {
       T p1, p2;
-      T i1, i2;
+      T i2;
       std::vector<T> trip;
       this->reset();
       set_edge_lengths (t.bin_value(), t.bin_value(), t.bin_value());
@@ -301,11 +299,10 @@ namespace Npoint_Functions {
       std::vector<vec3> v;
       fill_vector_list (t, v);
 
-      for (size_t j1=0; j1 < t.Npix(); ++j1) {
-	i1 = j1; // to make the code look symmetric
+      for (size_t i1=0; i1 < t.Npix(); ++i1) {
 	p1 = t.pixel_list(i1);
-	for (size_t j2=0; (j2 < t.Nmax()) && (t(j1,j2) != -1); ++j2) {
-	  i2 = t(j1,j2);
+	for (size_t j2=0; (j2 < t.Nmax()) && (t(i1,j2) != -1); ++j2) {
+	  i2 = t(i1,j2);
 	  p2 = t.pixel_list(i2);
 	  if (p2 < p1) continue;
 	  // Finally can search for and add appropriate pairs.
