@@ -10,26 +10,11 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.19 2011-07-27 04:01:44 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.20 2011-07-27 04:16:53 copi Exp $");
   /// @endcond
 }
 
 namespace {
-  /* Helper function to create a list of vectors pointing to HEALPix pixel
-   *  centers.  The vectors are labelled by the pixel INDEX in the
-   *  two point table, not the actual pixel number.
-   */
-  template<typename T>
-  void fill_vector_list (const Npoint_Functions::Twopt_Table<T>& t,
-			 std::vector<vec3>& veclist)
-  {
-    Healpix_Base HBase (t.Nside(), NEST, SET_NSIDE);
-    veclist.resize (t.Npix());
-    for (size_t i=0; i < t.Npix(); ++i) {
-      veclist[i] = HBase.pix2vec (t.pixel_list(i));
-    }
-  }
-
     /** Find matches in two lists and append them to a new list. */
   template<class IteratorType, typename T>
   void append_matches (IteratorType it1, IteratorType it1end,
@@ -367,8 +352,13 @@ namespace Npoint_Functions {
       for (size_t jj=ind_curr+1; jj < t->size(); ++jj) {
 	min2 = std::min (t->get(jj,0), t->get(jj,1));
 	if (min2 > min1) break;
-	if ((t->get(ind_curr,0) == t->get(jj,1))
-	    && (t->get(ind_curr,1) == t->get(jj,0))) {
+	if (
+	    ((t->get(ind_curr,0) == t->get(jj,1))
+	     && (t->get(ind_curr,1) == t->get(jj,0)))
+	    // Allow lines to cross!
+	    || ((t->get(ind_curr,0) == t->get(jj,0))
+		&& (t->get(ind_curr,1) == t->get(jj,1)))
+	    ) {
 	  pts[3] = t->get(jj,2);
 	  quads.push_back (pts);
 	}
