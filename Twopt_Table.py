@@ -2,11 +2,11 @@ import sys
 import struct
 import zlib
 
-# $Id$
+# $Id: Twopt_Table.py,v 1.1 2011-07-30 02:09:18 copi Exp $
 
 class Twopt_Table :
     """Python class for the storage of a single bin of a two point table.  See
-    the c++ version for details.  Only zlib compression integer tables, and
+    the C++ version for details.  Only zlib compression integer tables, and
     reading has been implemented."""
 
     def __init__ (self) :
@@ -88,9 +88,6 @@ class Twopt_Table :
     def bin_value (self) :
         return self.cosbin
 
-    def pixel_list (self) :
-        return self.pixlist
-
     def pixel_list (self, ind) :
         return self.pixlist[ind]
 
@@ -108,6 +105,3 @@ class Twopt_Table :
 
     def get (self, i, j) :
         return self.table_read[i*self.Nmax()+j]
-
-    def get (self) :
-        return self.table_read
