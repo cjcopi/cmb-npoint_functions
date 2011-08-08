@@ -6,6 +6,8 @@
 #include <fstream>
 #include <tr1/memory> // For std::tr1::shared_ptr
 
+#include "healpix_tables.h" // For Healpix_Ordering_Scheme
+
 #if defined(USE_NO_COMPRESSION)
 #  include <No_Compression_Wrapper.h>
 #elif defined(USE_LZMA_COMPRESSION)
@@ -17,24 +19,25 @@
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.17 2011-07-20 18:34:01 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.18 2011-07-23 01:16:22 copi Exp $");
   /// @endcond
 }
 
 namespace Npoint_Functions {
   /** Storage for a single bin of a two point table.
    *
-   *  A two point table consists of a list of pixels in the NEST scheme, the
-   *  value of the lower edge of the bin, and a rectangle table of pixel
-   *  indices in the bin.  The size of the table is Npix() x Nmax() where
-   *  Nmax() is the maximum number of entries in a row.  The table is "-1"
-   *  padded to make it rectangular.
+   *  A two point table consists of a list of pixels typically in the NEST
+   *  scheme, the value of the center of the bin, and a rectangle table of
+   *  pixel indices in the bin.  The size of the table is Npix() x Nmax()
+   *  where Nmax() is the maximum number of entries in a row.  The table is
+   *  "-1" padded to make it rectangular.
    *
    *  Note that the pixel \b index is stored in the table, not the pixel
    *  number itself.  For a full sky map with the pixels in order these two
-   *  are the same, however, for a masked sky or for the pixels not in order
-   *  (for some reason) then the pixel index is \b not the same as the pixel
-   *  number.  To get the pixel number use the appropriate entry from pixel_list().
+   *  are the same, however, for a masked sky or for the pixels not in
+   *  order (for some reason) then the pixel index is \b not the same as
+   *  the pixel number.  To get the pixel number use the appropriate entry
+   *  from pixel_list().
    *
    *  Reading and writing two point tables are different processes and are
    *  internally treated differently.  You cannot not mix reading and writing
@@ -80,6 +83,7 @@ namespace Npoint_Functions {
     std::vector<T> pixlist;
     double cosbin;
     size_t nside, nmax;
+    Healpix_Ordering_Scheme scheme;
 
     /** Write the output table to the stream with compression.
      *  The table and nmax MUST be set correctly before calling.
@@ -126,8 +130,8 @@ namespace Npoint_Functions {
 
       // First version
       in.read (&version, sizeof(version));
-      if (version != 2) {
-	std::cerr << "Twopt_Table only supports file format version 2\n";
+      if (version != 3) {
+	std::cerr << "Twopt_Table only supports file format version 3\n";
 	return false;
       }
       in.read (reinterpret_cast<char*>(&cosbin), sizeof(cosbin));
@@ -137,6 +141,10 @@ namespace Npoint_Functions {
       for (size_t p=0; p < Npix; ++p) {
 	in.read (reinterpret_cast<char*>(&pixlist[p]), sizeof(T));
       }
+      char s;
+      in.read (&s, sizeof(s));
+      if (s == 0) scheme = NEST;
+      else scheme = RING;
       in.read (reinterpret_cast<char*>(&nmax), sizeof(nmax));
       return (! in.fail());
     }
@@ -147,13 +155,14 @@ namespace Npoint_Functions {
     //@{
     /// Generic constructor.
     Twopt_Table () : table_write(), table_read(), pixlist(), cosbin(0),
-		     nside(0), nmax(0) {} 
+		     nside(0), nmax(0), scheme(NEST) {} 
     /** Construct and initialize a table given the pixel list and the
      *  values of the bins.
      */
-    Twopt_Table (size_t Nside, const std::vector<T>& pl, double binvalue)
+    Twopt_Table (size_t Nside, const std::vector<T>& pl,
+		 double binvalue, Healpix_Ordering_Scheme s=NEST)
       : table_write(pl.size()), table_read(), pixlist(pl),
-	cosbin(binvalue), nside(Nside), nmax(0) {}
+	cosbin(binvalue), nside(Nside), nmax(0), scheme(s) {}
     //@}
 
     /// Add an entry to the two point table.
@@ -168,11 +177,12 @@ namespace Npoint_Functions {
     { add(i,j); add(j,i); }
 
     /** Write the table to a binary file.
-     *  At present version 1 of the file format is written.  This format is
+     *  At present version 3 of the file format is written.  This format is
      * version number (char)
      * bin value (double)
      * Npix (size_t)
      * list of pixels (Npix of them of type T)
+     * HEALPix scheme (char, 0==NEST, 1==RING)
      * Nmax (size_t)
      * table values (Npix x Nmax of them of type T written in row major order)
      *
@@ -180,7 +190,7 @@ namespace Npoint_Functions {
      */
     void write_file (const std::string& filename)
     {
-      char version = 2;
+      char version = 3;
       size_t Npix = pixlist.size();
       std::ofstream out (filename.c_str(),
 			 std::fstream::out | std::fstream::trunc
@@ -193,6 +203,10 @@ namespace Npoint_Functions {
       for (size_t p=0; p < Npix; ++p) {
 	out.write (reinterpret_cast<char*>(&pixlist[p]), sizeof(T));
       }
+      char s = 0;
+      if (scheme == RING) s = 1;
+      out.write (&s, sizeof(s));
+
       // Now figure out what the maximum number of values in a pixel bin are
       nmax = 0;
       for (size_t p=0; p < Npix; ++p) {
@@ -206,7 +220,7 @@ namespace Npoint_Functions {
     }
 
     /** Read the table from a binary file.
-     *  At present version 1 of the file format is supported.  See
+     *  At present version 3 of the file format is supported.  See
      *  write_file() for details.
      */
     bool read_file (const std::string& filename)
@@ -234,7 +248,7 @@ namespace Npoint_Functions {
      *  Only the header is read, not the table.  This is useful for getting
      *  information about the two point tables, such as the pixels in them,
      *  the bin value, without having to read and decompress the whole file.
-     *  At present version 1 of the file format is supported.  See
+     *  At present version 3 of the file format is supported.  See
      *  write_file() for details. 
      */
     bool read_file_header (const std::string& filename)
@@ -266,7 +280,7 @@ namespace Npoint_Functions {
      *  Access internal information.
      */
     //@{
-    /// The value of the left edge of the bin.
+    /// The value of the center of the bin.
     inline double bin_value () const { return cosbin; }
     /// The list of pixels.
     inline const std::vector<T>& pixel_list () const { return pixlist; }
@@ -274,6 +288,8 @@ namespace Npoint_Functions {
     inline const T& pixel_list (size_t ind) const { return pixlist[ind]; }
     /// The number of pixels.
     inline size_t Npix() const { return pixlist.size(); }
+    /// HEALPix scheme for the pixel list.
+    Healpix_Ordering_Scheme Scheme() const { return scheme; }
     /// The HEALPix resolution of the table.
     inline size_t Nside() const { return nside; }
     /// The maximum number of values in each row of the table.
