@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.15 2011-07-21 22:07:44 copi Exp $
+# $Id: Makefile,v 1.16 2011-07-21 22:10:39 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags`
@@ -22,13 +22,15 @@ OPTIMIZE=-O3 -ffast-math -fomit-frame-pointer -Wall -W
 USE_LIB_HEALPIX=create_twopt_table calculate_twopt_correlation_function \
 	calculate_equilateral_threept_correlation_function \
 	calculate_isosceles_threept_correlation_function \
-	calculate_equilateral_fourpt_correlation_function
+	calculate_equilateral_fourpt_correlation_function \
+	test_rhombic_quadrilaterals
 # Targets that may use compression
 USE_COMPRESSION=create_twopt_table \
 	calculate_twopt_correlation_function \
 	calculate_equilateral_threept_correlation_function \
 	calculate_isosceles_threept_correlation_function \
-	calculate_equilateral_fourpt_correlation_function
+	calculate_equilateral_fourpt_correlation_function \
+	test_rhombic_quadrilaterals
 ifdef USE_NO_COMPRESSION
 	override DEFINES+=-DUSE_NO_COMPRESSION
 	COMPRESSION_WRAPPER=No_Compression_Wrapper.h
@@ -106,6 +108,8 @@ calculate_isosceles_threept_correlation_function : \
 	calculate_isosceles_threept_correlation_function.o
 calculate_equilateral_fourpt_correlation_function : \
 	calculate_equilateral_fourpt_correlation_function.o
+test_rhombic_quadrilaterals : \
+	test_rhombic_quadrilaterals.o
 
 # Individual file dependencies
 create_twopt_table.o : create_twopt_table.cpp \
@@ -127,6 +131,11 @@ calculate_isosceles_threept_correlation_function.o : \
 	Npoint_Functions_Utils.h
 calculate_equilateral_fourpt_correlation_function.o : \
 	calculate_equilateral_fourpt_correlation_function.cpp \
+	Twopt_Table.h Pixel_Triangles.h \
+	$(COMPRESSION_WRAPPER) \
+	Npoint_Functions_Utils.h
+test_rhombic_quadrilaterals.o : \
+	test_rhombic_quadrilaterals.cpp \
 	Twopt_Table.h Pixel_Triangles.h \
 	$(COMPRESSION_WRAPPER) \
 	Npoint_Functions_Utils.h
