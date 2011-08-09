@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.16 2011-07-21 22:10:39 copi Exp $
+# $Id: Makefile,v 1.17 2011-08-08 20:05:54 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags`
@@ -136,6 +136,6 @@ calculate_equilateral_fourpt_correlation_function.o : \
 	Npoint_Functions_Utils.h
 test_rhombic_quadrilaterals.o : \
 	test_rhombic_quadrilaterals.cpp \
-	Twopt_Table.h Pixel_Triangles.h \
+	Twopt_Table.h Pixel_Triangles.h Pixel_Quadrilaterals.h \
 	$(COMPRESSION_WRAPPER) \
 	Npoint_Functions_Utils.h
