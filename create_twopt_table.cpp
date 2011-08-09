@@ -38,28 +38,9 @@
  */
 namespace {
   const std::string CREATE_TWOPT_TABLE_RCSID
-  ("$Id: create_twopt_table.cpp,v 1.10 2011-07-15 16:16:23 copi Exp $");
+  ("$Id: create_twopt_table.cpp,v 1.11 2011-07-20 18:34:01 copi Exp $");
 }
 
-void dtheta_to_cosbin (double dtheta, std::vector<double>& cosbin)
-{
-  dtheta *= M_PI / 180.0; // Convert from degrees to radians
-  cosbin.clear();
-  double theta = M_PI;
-  while (theta > 0) {
-    cosbin.push_back(std::cos(theta));
-    theta -= dtheta;
-  }
-}
-void dcostheta_to_cosbin (double dcostheta, std::vector<double>& cosbin)
-{
-  cosbin.clear();
-  double cb = -1;
-  while (cb < 1) {
-    cosbin.push_back(cb);
-    cb += dcostheta;
-  }
-}
 void mask_to_pixlist (const Healpix_Map<double>& mask,
 		      std::vector<int>& pixlist)
 {
@@ -93,9 +74,6 @@ bool read_text_file (const std::string& cosbinfile,
     bin_list.push_back(vals[0]);
   }
   in.close();
-  // Make sure the list ends with the 1.0 bin
-  if (abs(bin_list[bin_list.size()-1] - 1) > 1.0e-12)
-    bin_list.push_back (1.0);
   return true;
 }
   
@@ -115,8 +93,8 @@ int main (int argc, char *argv[])
   paramfile params (argv[1]);
   int Nside = params.find<int> ("Nside", -1);
   std::string maskfile = params.find<std::string> ("maskfile", "");
+  double dcosbin = params.find<double> ("dcosbin", -100);
   double dtheta = params.find<double> ("dtheta", -200);
-  double dcostheta = params.find<double> ("dcostheta", -200);
   std::string cosbinfile = params.find<std::string> ("cosbinfile", "");
   std::string tmpfile_prefix = params.find<std::string> ("tmpfile_prefix");
   std::string twoptfile_prefix = params.find<std::string> ("twoptfile_prefix");
@@ -127,9 +105,8 @@ int main (int argc, char *argv[])
     return 1;
   }
 
-  if ((dtheta == -200) && (dcostheta == -200) && (cosbinfile == "")) {
-    std::cerr << "A source of bins must be provided in the parameter file\n"
-	      << "  Set cosbinfile, dtheta, or dcostheta.\n";
+  if ((dcosbin == -100) && (cosbinfile == "") && (dtheta == -200)) {
+    std::cerr << "cosbinfile or dcosbin or dtheta must be set in the parameter file.\n";
     return 1;
   }
 
@@ -145,22 +122,51 @@ int main (int argc, char *argv[])
 		   Npoint_Functions::myRange<int>());
   }
 
+  std::vector<double> cosbin;
   if (cosbinfile != "") {
     if (! read_text_file (cosbinfile, bin_list)) {
       std::cerr << "Failed reading " << cosbinfile << std::endl;
       return 1;
     }
-  } else if (dcostheta != -200) {
-    dcostheta_to_cosbin (dcostheta, bin_list);
+  } else if (dcosbin != -100) {
+    int Nbin = 2/dcosbin;
+    bin_list.resize(Nbin);
+    std::generate (bin_list.begin(), bin_list.end(),
+		   Npoint_Functions::myRange<double>(-1.0+dcosbin/2,
+						     dcosbin));
   } else {
-    dtheta_to_cosbin (dtheta, bin_list);
+    int Nbin = 180/dtheta;
+    bin_list.resize(Nbin);
+    /* Run this "backward" since we will use bins in cos(theta) and
+     * cos(180)=-1. */
+    std::generate (bin_list.begin(), bin_list.end(),
+		   Npoint_Functions::myRange<double>(180-dtheta/2,
+						     -dtheta));
+    /* We want equal spacing/width in theta (I guess) so
+     * create cosbin here with this in mind. */
+    cosbin.push_back(-1.1);
+    for (size_t j=0; j < bin_list.size()-1; ++j) {
+      cosbin.push_back(cos(0.5*(bin_list[j]+bin_list[j+1])*M_PI/180));
+    }
+    cosbin.push_back(1.1);
+  }
+
+  /* Convert bin_list to bin edges. Put the ends of the bins a little off
+   * the min and max values so we don't have to deal with the dot product
+   * numerically being a little too big or small.
+   */  
+  if (cosbin.size() == 0) {
+    cosbin.push_back(-1.1);
+    for (size_t j=0; j < bin_list.size()-1; ++j) {
+      cosbin.push_back(0.5*(bin_list[j]+bin_list[j+1]));
+    }
+    cosbin.push_back(1.1);
   }
 
   size_t Npix = pixel_list.size();
-  size_t Nbin = bin_list.size() - 1;
   std::cout << "Generating for\n Nside = " << Nside
 	    << "\n Npix = " << Npix
-	    << "\n Nbin = " << Nbin
+	    << "\n Nbin = " << bin_list.size()
 	    << std::endl;
 
   Healpix_Base HBase (Nside, NEST, SET_NSIDE);
@@ -171,7 +177,7 @@ int main (int argc, char *argv[])
   }
 
   std::vector<Npoint_Functions::buffered_pair_binary_file<int> > binfiles;
-  for (size_t k=0; k < Nbin; ++k) {
+  for (size_t k=0; k < bin_list.size(); ++k) {
     binfiles.push_back(Npoint_Functions::buffered_pair_binary_file<int>
 		       (Npoint_Functions::make_filename
 			(tmpfile_prefix, k))); 
@@ -191,9 +197,9 @@ int main (int argc, char *argv[])
   for (size_t i=0; i < Npix; ++i) {
     for (size_t j=i+1; j < Npix; ++j) {
       dp = dotprod (veclist[i], veclist[j]);
-      dp = std::max (dp, -1.0);
-      dp = std::min (dp,  1.0);
-      if (dp > bin_list[ibin]) dir = +1;
+      //dp = std::max (dp, -1.0);
+      //dp = std::min (dp,  1.0);
+      if (dp > cosbin[ibin]) dir = +1;
       else dir = -1;
       /* Find the bin.  Since we use the NEST scheme a simple linear search
        * is efficient; sequential pixels are near each other so it should
@@ -202,13 +208,10 @@ int main (int argc, char *argv[])
        * won't be efficient.  Even so, the number of bins is expected to be
        * small so a more sophisticated algorithm isn't warranted.
        *
-       * We do NOT require the bin list to be inclusive, ie start at -1 (or
-       * smaller) and end at 1 (or larger).  If a value is "off the end" of
-       * the list we stick the value in the first or last bin, as
-       * appropriate.
+       * We REQUIRE the bin list to be inclusive, ie start at -1 (or
+       * smaller) and end at 1 (or larger).
        */
-      while ( (((ibin != 0) && (dir < 0)) || ((ibin != Nbin-1) && (dir > 0)))
-	      && ((dp < bin_list[ibin]) || (dp > bin_list[ibin+1])))
+      while ((dp < cosbin[ibin]) || (dp > cosbin[ibin+1]))
 	ibin += dir;
       binfiles[ibin].append(i, j);
     }
@@ -219,8 +222,9 @@ int main (int argc, char *argv[])
   binfiles.clear();
   std::cout << "Temporary files created.\n";
 
+  std::cout << "Creating two point tables.\n";
   // Now create the 2 point tables.   This can trivially be parallelized.
-#pragma omp parallel shared(binfiles, Nbin, Npix, pixel_list, bin_list, \
+#pragma omp parallel shared(binfiles, Npix, pixel_list, bin_list, \
   tmpfile_prefix, twoptfile_prefix)
   {
     Npoint_Functions::Twopt_Table<int>
@@ -228,7 +232,7 @@ int main (int argc, char *argv[])
 
     int i, j;
 #pragma omp for schedule(guided)
-    for (size_t k=0; k < Nbin; ++k) {
+    for (size_t k=0; k < bin_list.size(); ++k) {
       twopt_table.reset();
       twopt_table.bin_value (bin_list[k]);
       Npoint_Functions::buffered_pair_binary_file<int>
