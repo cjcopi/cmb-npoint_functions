@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string NPOINT_FUNCTIONS_UTILS_RCSID
-  ("$Id: Npoint_Functions_Utils.h,v 1.3 2011-07-17 03:11:28 copi Exp $");
+  ("$Id: Npoint_Functions_Utils.h,v 1.4 2011-07-27 19:48:15 copi Exp $");
   /// @endcond
 }
 
@@ -93,10 +93,25 @@ namespace Npoint_Functions {
   void fill_vector_list (const Npoint_Functions::Twopt_Table<T>& t,
 			 std::vector<vec3>& veclist)
   {
-    Healpix_Base HBase (t.Nside(), NEST, SET_NSIDE);
+    Healpix_Base HBase (t.Nside(), t.Scheme(), SET_NSIDE);
     veclist.resize (t.Npix());
     for (size_t i=0; i < t.Npix(); ++i) {
       veclist[i] = HBase.pix2vec (t.pixel_list(i));
+    }
+  }
+
+  /** Fill a list with HEALpix vectors.
+   *  Helper function to create a list of vectors pointing to HEALPix pixel
+   *  centers.  All vectors for the provided \a Nside are calculated in the
+   *  \a scheme HEALPix ordering scheme.
+   */
+  void fill_vector_list (size_t Nside, Healpix_Ordering_Scheme scheme,
+			 std::vector<vec3>& veclist)
+  {
+    Healpix_Base HBase (Nside, scheme, SET_NSIDE);
+    veclist.resize (HBase.Npix());
+    for (size_t i=0; i < veclist.size(); ++i) {
+      veclist[i] = HBase.pix2vec (i);
     }
   }
 
