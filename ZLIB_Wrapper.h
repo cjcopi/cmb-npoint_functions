@@ -9,7 +9,7 @@
 namespace {
   /// @cond IDTAG
   const std::string ZLIB_WRAPPER_RCSID
-  ("$Id: ZLIB_Wrapper.h,v 1.2 2011-07-15 16:16:23 copi Exp $");
+  ("$Id: ZLIB_Wrapper.h,v 1.3 2011-07-17 03:36:30 copi Exp $");
   /// @endcond
 }
 
@@ -36,6 +36,8 @@ namespace Npoint_Functions {
     bool write_buffer (std::ofstream& out,
 		       void *buf_in, size_t Nbytes)
     {
+      if (Nbytes == 0) return true;
+
       /* Create the compression buffer.  We know the data CAN be compressed
        * so we set this to be the same size as the full buffer.  This is
        * overkill but should should be safe.
@@ -94,6 +96,7 @@ namespace Npoint_Functions {
       in.seekg (0, std::ios::end);
       size_t in_len = in.tellg() - curpos;
       in.seekg (curpos, std::ios::beg);
+      if (in_len == 0) return true;
       std::tr1::shared_ptr<unsigned char> buf_comp (new unsigned char [ in_len ]);
       in.read (reinterpret_cast<char*>(buf_comp.get()), in_len);
 
