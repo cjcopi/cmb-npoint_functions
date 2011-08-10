@@ -16,7 +16,7 @@
 
 namespace {
   const std::string CALCULATE_QUADRILATERAL_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_equilateral_fourpt_correlation_function.cpp,v 1.3 2011-07-27 03:40:25 copi Exp $");
+  ("$Id: calculate_equilateral_fourpt_correlation_function.cpp,v 1.4 2011-07-27 04:16:53 copi Exp $");
 }
 
 
@@ -49,14 +49,15 @@ int main (int argc, char *argv[])
   {
     double C4;
     size_t Nquads;
-    Npoint_Functions::Twopt_Table<int> twopt_table_equal;
     Npoint_Functions::Twopt_Table<int> twopt_table;
-    Npoint_Functions::Pixel_Triangles_Isosceles<int> triangles;
+    Npoint_Functions::Pixel_Triangles_Equilateral<int> triangles;
     std::vector<std::vector<int> > quads;
     Npoint_Functions::Quads<int> q;
 
 #pragma omp for schedule(dynamic,2)
     for (size_t k=0; k < twopt_table_file.size(); ++k) {
+      twopt_table.read_file (twopt_table_file[k]);
+
       /* So only one thread writes at a time.  Really only matters on
        * initial startup. */
 #pragma omp critical
@@ -65,32 +66,24 @@ int main (int argc, char *argv[])
 #ifdef OMP
 	  << omp_get_thread_num() << " "
 #endif       
-	  << k << std::endl;
+	  << k << " " << twopt_table.Nmax() << std::endl;
       }
 
-      twopt_table_equal.read_file (twopt_table_file[k]);
-      bin_list[k] = twopt_table_equal.bin_value();
+      bin_list[k] = twopt_table.bin_value();
+      if (twopt_table.Nmax() == 0) {
+	std::cerr << "Nmax = 0 for bin " << k << std::endl;
+	continue;
+      }
       C4 = 0;
       Nquads = 0;
-      // Now loop over the bins again so we get the unequal bin length.
-      for (size_t kk=0; kk < twopt_table_file.size(); ++kk) {
-	twopt_table.read_file (twopt_table_file[kk]);
-	/* Triangles can only be formed if this side is less than or equal
-	 * to twice the equal length side.  No point in going through the
-	 * work for triangles that cannot exist.
-	 */
-	if (2*std::acos(twopt_table_equal.bin_value())
-	    < std::acos(twopt_table.bin_value()))
-	  continue;
-	triangles.find_triangles (twopt_table_equal, twopt_table);
-	q.initialize (triangles);
-	while (q.next(quads)) {
-	  for (size_t j=0; j < quads.size(); ++j) {
-	    C4 += map[quads[j][0]] * map[quads[j][1]]
-	      * map[quads[j][2]] * map[quads[j][3]];
-	  }
-	  Nquads += quads.size();
+      triangles.find_triangles (twopt_table);
+      q.initialize (triangles);
+      while (q.next(quads)) {
+	for (size_t j=0; j < quads.size(); ++j) {
+	  C4 += map[quads[j][0]] * map[quads[j][1]]
+	    * map[quads[j][2]] * map[quads[j][3]];
 	}
+	Nquads += quads.size();
       }
       if (Nquads != 0) C4 /= Nquads;
       Corr[k] = C4;
