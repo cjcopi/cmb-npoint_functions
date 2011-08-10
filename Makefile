@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.19 2011-08-10 02:57:33 copi Exp $
+# $Id: Makefile,v 1.20 2011-08-10 18:46:10 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags` -I$(HOME)/opt/myHealpix/include
@@ -144,5 +144,4 @@ test_rhombic_quadrilaterals.o : \
 create_rhombic_quadrilaterals_list.o : \
 	create_rhombic_quadrilaterals_list.cpp \
 	Twopt_Table.h Pixel_Triangles.h Pixel_Quadrilaterals.h \
-	$(COMPRESSION_WRAPPER) \
-	Npoint_Functions_Utils.h
+	$(COMPRESSION_WRAPPER)
