@@ -1,7 +1,7 @@
-# $Id: Makefile,v 1.17 2011-08-08 20:05:54 copi Exp $
+# $Id: Makefile,v 1.18 2011-08-09 22:06:14 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
-HEALPIX_INC=`healpix-config --cppflags`
+HEALPIX_INC=`healpix-config --cppflags` -I$(HOME)/opt/myHealpix/include
 HEALPIX_LIBS=`healpix-config --cpplibs`
 
 DOXYGEN=doxygen
