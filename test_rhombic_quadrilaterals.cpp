@@ -4,9 +4,10 @@
 
 #include <Twopt_Table.h>
 #include <Pixel_Triangles.h>
+#include <Pixel_Quadrilaterals.h>
 #include <Npoint_Functions_Utils.h>
 
-// $Id$
+// $Id: test_rhombic_quadrilaterals.cpp,v 1.1 2011-08-08 20:05:37 copi Exp $
 
 int main ()
 {
@@ -19,7 +20,7 @@ int main ()
   std::vector<int> tri;
   std::vector<int> thirdpt;
   thirdpt.reserve(100);
-  Npoint_Functions::Quadrilaterals_Rhombic<int> q;
+  Npoint_Functions::Pixel_Quadrilaterals_Rhombic_Full<int> q;
   triangles.find_triangles (twopt_table);
   q.initialize (triangles);
   while (q.next(tri, thirdpt)) {
