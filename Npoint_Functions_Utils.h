@@ -7,10 +7,12 @@
 #include <iomanip>
 #include <sstream>
 
+#include <Twopt_Table.h>
+
 namespace {
   /// @cond IDTAG
   const std::string NPOINT_FUNCTIONS_UTILS_RCSID
-  ("$Id: Npoint_Functions_Utils.h,v 1.4 2011-07-27 19:48:15 copi Exp $");
+  ("$Id: Npoint_Functions_Utils.h,v 1.5 2011-08-09 21:08:50 copi Exp $");
   /// @endcond
 }
 
