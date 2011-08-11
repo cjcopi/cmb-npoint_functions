@@ -13,7 +13,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_QUADRILATERALS_RCSID
-  ("$Id: Pixel_Quadrilaterals.h,v 1.2 2011-08-10 02:58:50 copi Exp $");
+  ("$Id: Pixel_Quadrilaterals.h,v 1.3 2011-08-10 17:59:44 copi Exp $");
   /// @endcond
 }
 
@@ -54,6 +54,7 @@ namespace Npoint_Functions {
        * triangle the skip list is indexed by pixel number at the relevant
        * Nside. */
       skiplist.assign (12*triangle.Nside()*triangle.Nside(), 0);
+      if (triangle.size() == 0) return;
       T prev = triangle.get(0,0);
       for (size_t j=1; j < triangle.size(); ++j) {
 	if (triangle.get(j,0) != prev) {
@@ -115,7 +116,7 @@ namespace Npoint_Functions {
      */
     bool next (std::vector<T>& pts, std::vector<T>& thirdpt)
     {
-      if ((ind_curr >= t->size()-1)
+      if ((ind_curr >= t->size())
 	  || (t->get(ind_curr,0) > pixval_end)) return false;
       thirdpt.clear();
       pts.resize(3);
