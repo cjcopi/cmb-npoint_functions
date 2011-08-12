@@ -16,8 +16,31 @@
 
 namespace {
   const std::string CREATE_RHOMBIC_QUADRILATERALS_LIST_PARALLEL_RCSID
-  ("$Id: create_rhombic_quadrilaterals_list.cpp,v 1.2 2011-08-10 18:56:28 copi Exp $");
+  ("$Id: create_rhombic_quadrilaterals_list_parallel.cpp,v 1.1 2011-08-12 02:24:39 copi Exp $");
 }
+
+/* Simple vector.  NOT for general use.
+ * This is a thin wrapper around raw memory without error checking ....
+ */
+template<typename T>
+class simple_vector {
+private :
+  size_t Nbuf, N;
+  T *buf;
+public :
+  simple_vector () : Nbuf(0), N(0), buf(0) {}
+  simple_vector (size_t size) : Nbuf(size), N(0), buf(new T[size]) {}
+  ~simple_vector () { if (buf != 0) delete [] buf; }
+  
+  inline T& operator [] (size_t j) { return buf[j]; }
+  inline const T operator [] (size_t j) const { return buf[j]; }
+ // NO ERROR CHECKING IS PERFORMED!
+  inline void push_back (const T& val)
+  { buf[N++] = val; }
+  inline size_t size() const { return N; }
+  inline size_t capacity() const { return Nbuf; }
+  inline void clear() { N = 0; }
+};
 
 // Simple wrapper
 struct PixelInfo {
@@ -92,7 +115,7 @@ void usage (const char *progname)
   exit (0);
 }
 
-void write_quad_buffer (const std::vector<int>& quad_buf)
+void write_quad_buffer (const simple_vector<int>& quad_buf)
 {
 #pragma omp critical
   {
@@ -107,8 +130,7 @@ void write_quad_buffer (const std::vector<int>& quad_buf)
 
 void add_quads (const std::vector<int>& tri,
 		const std::vector<int>& thirdpt,
-		std::vector<int>& quad_buf, 
-		size_t Nbuf)
+		simple_vector<int>& quad_buf)
 {
   for (size_t j=0; j < thirdpt.size(); ++j) {
     for (size_t i=0; i < tri.size(); ++i) quad_buf.push_back(tri[i]);
@@ -116,7 +138,7 @@ void add_quads (const std::vector<int>& tri,
     /* We really don't want the buffer to "overflow" since
      * it could end up needed a huge amount of memory.  Instead we
      * will just empty it if the need arises. */
-    if (quad_buf.size() >= 4*Nbuf) {
+    if (quad_buf.size() >= 4*quad_buf.capacity()) {
       write_quad_buffer (quad_buf);
       quad_buf.clear();
     }
@@ -171,8 +193,7 @@ int main (int argc, char *argv[])
      */
     // Number of quad space we want to reserve.  This is a bit under 500MB.
     const size_t Nbuf = 30000000;
-    std::vector<int> quad_buf;
-    quad_buf.reserve(4*Nbuf);
+    simple_vector<int> quad_buf(4*Nbuf);
     
 #pragma omp for schedule(dynamic,1)
     for (size_t j=0; j < pixel_list.size(); ++j) {
@@ -180,22 +201,22 @@ int main (int argc, char *argv[])
       q.initialize(pix);
       while (q.next(tri, thirdpt)) {
 	// First add the quads.
-	add_quads (tri, thirdpt, quad_buf, Nbuf);
+	add_quads (tri, thirdpt, quad_buf);
 	// Next shift by base pixel 3 times.
 	for (int n=0; n < 3; ++n) {
 	  pixtrans.shift_by_base (tri);
 	  pixtrans.shift_by_base (thirdpt);
-	  add_quads (tri, thirdpt, quad_buf, Nbuf);
+	  add_quads (tri, thirdpt, quad_buf);
 	}
 	// Then reflect through z=0 line
 	pixtrans.reflect_through_z0 (tri);
 	pixtrans.reflect_through_z0 (thirdpt);
-	add_quads (tri, thirdpt, quad_buf, Nbuf);
+	add_quads (tri, thirdpt, quad_buf);
 	// and shift by base pixel 3 times.
 	for (int n=0; n < 3; ++n) {
 	  pixtrans.shift_by_base (tri);
 	  pixtrans.shift_by_base (thirdpt);
-	  add_quads (tri, thirdpt, quad_buf, Nbuf);
+	  add_quads (tri, thirdpt, quad_buf);
 	}
 
 	// If we have a base0 pixel we are done
@@ -205,27 +226,26 @@ int main (int argc, char *argv[])
 	// Reflect through z-axis
 	pixtrans.reflect_through_zaxis (tri);
 	pixtrans.reflect_through_zaxis (thirdpt);
-	add_quads (tri, thirdpt, quad_buf, Nbuf);
+	add_quads (tri, thirdpt, quad_buf);
 	// and shift by base pixel 3 times.
 	for (int n=0; n < 3; ++n) {
 	  pixtrans.shift_by_base (tri);
 	  pixtrans.shift_by_base (thirdpt);
-	  add_quads (tri, thirdpt, quad_buf, Nbuf);
+	  add_quads (tri, thirdpt, quad_buf);
 	}
 	// Then reflect through z=0 line
 	pixtrans.reflect_through_z0 (tri);
 	pixtrans.reflect_through_z0 (thirdpt);
-	add_quads (tri, thirdpt, quad_buf, Nbuf);
+	add_quads (tri, thirdpt, quad_buf);
 	// and shift by base pixel 3 times.
 	for (int n=0; n < 3; ++n) {
 	  pixtrans.shift_by_base (tri);
 	  pixtrans.shift_by_base (thirdpt);
-	  add_quads (tri, thirdpt, quad_buf, Nbuf);
+	  add_quads (tri, thirdpt, quad_buf);
 	}
       }
-      write_quad_buffer (quad_buf);
-      quad_buf.clear();
     }
+    write_quad_buffer (quad_buf);
   }
 
   return 0;
