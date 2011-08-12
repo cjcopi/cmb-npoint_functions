@@ -4,12 +4,15 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <algorithm>
 #include <tr1/memory> // For std::tr1::shared_ptr
+
+#include <healpix_map.h>
 
 namespace {
   /// @cond IDTAG
   const std::string QUADRILATERAL_LIST_FILE_RCSID
-  ("$Id: Pixel_Quadrilaterals.h,v 1.4 2011-08-11 16:23:48 copi Exp $");
+  ("$Id: Quadrilateral_List_File.h,v 1.1 2011-08-11 20:31:26 copi Exp $");
   /// @endcond
 }
 
@@ -110,6 +113,116 @@ namespace Npoint_Functions {
     double bin_value() const { return binval; }
     //@}
   };
+
+  // Not sure this really belongs here, but...
+  /** Calculate the four point function.
+   *  Use a Quadrilateral_List_File to calculate the four point function
+   *  for the provided HEALPix map.  It is \b assumed that the scheme of
+   *  the map is the same as that of the quadrilateral list.
+   *
+   *  \relates Quadrilateral_List_File
+   */
+  template<typename TM, typename TL>
+  TM calculate_fourpoint_function (const Healpix_Map<TM>& maps,
+				   Quadrilateral_List_File<TL>& qlf)
+  {
+    size_t ind;
+    TL p[4];
+    TL N[4];
+    TL *arr;
+    size_t Nquad = 0;
+    TM C[4];
+    C[0] = 0.0;
+
+    while ((arr = qlf.next()) != 0) {
+      ind = 0;
+      p[0] = arr[ind++];
+      N[1] = arr[ind++];
+      C[1] = 0.0;
+      for (int n1=0; n1 < N[1]; ++n1) {
+	p[1] = arr[ind++];
+	N[2] = arr[ind++];
+	C[2] = 0.0;
+	for (int n2=0; n2 < N[2]; ++n2) {
+	  p[2] = arr[ind++];
+	  N[3] = arr[ind++];
+	  Nquad += N[3];
+	  C[3] = 0.0;
+	  for (int n3=0; n3 < N[3]; ++n3) {
+	    C[3] += map[arr[ind++]];
+	  }
+	  C[2] += map[p[2]] * C[3];
+	}
+	C[1] += map[p[1]] * C[2];
+      }
+      C[0] += map[p[0]] * C[1];
+    }
+
+    if (Nquad > 0) C[0] /= Nquad;
+    return C[0];
+  }
+
+  /** Calculate the four point function for a list of maps.
+   *  Use a Quadrilateral_List_File to calculate the four point function
+   *  for the provided list of HEALPix maps.  It is \b assumed that the
+   *  scheme of the maps is the same as that of the quadrilateral list.
+   *
+   *  This is a specialized version of calculate_fourpoint_function()
+   *  optimized for more than one map at a time.
+   *
+   *  \relates Quadrilateral_List_File
+   */
+  template<typename TM, typename TL>
+  void calculate_fourpoint_function_list
+  (const std::vector<Healpix_Map<TM> >& maps,
+   Quadrilateral_List_File<TL>& qlf,
+   std::vector<TM>& C4)
+  {
+    std::fill (C4.begin(), C4.end(), 0.0);
+
+    size_t ind;
+    TL p[4];
+    TL N[4];
+    TL *arr;
+    size_t Nquad = 0;
+    // Temporary storage space
+    std::vector<TM> C1(maps.size());
+    std::vector<TM> C2(maps.size());
+    std::vector<TM> C3(maps.size());
+
+    while ((arr = qlf.next()) != 0) {
+      ind = 0;
+      p[0] = arr[ind++];
+      N[1] = arr[ind++];
+      std::fill (C1.begin(), C1.end(), 0.0);
+      for (int n1=0; n1 < N[1]; ++n1) {
+	p[1] = arr[ind++];
+	N[2] = arr[ind++];
+	std::fill (C2.begin(), C2.end(), 0.0);
+	for (int n2=0; n2 < N[2]; ++n2) {
+	  p[2] = arr[ind++];
+	  N[3] = arr[ind++];
+	  Nquad += N[3];
+	  std::fill (C3.begin(), C3.end(), 0.0);
+	  for (int n3=0; n3 < N[3]; ++n3) {
+	    for (size_t j=0; j < C3.size(); ++j)
+	      C3[j] += maps[j][arr[ind]];
+	    ++ind;
+	  }
+	  for (size_t j=0; j < C2.size(); ++j)
+	    C2[j] += maps[j][p[2]] * C3[j];
+	}
+	for (size_t j=0; j < C2.size(); ++j)
+	  C1[j] += maps[j][p[1]] * C2[j];
+      }
+      for (size_t j=0; j < C4.size(); ++j)
+	C4[j] += maps[j][p[0]] * C1[j];
+    }
+    if (Nquad > 0) {
+      for (size_t j=0; j < C4.size(); ++j)
+	C4[j] /= Nquad;
+    }
+  }
 }
 
 #endif
