@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.20 2011-08-10 18:46:10 copi Exp $
+# $Id: Makefile,v 1.21 2011-08-10 18:56:28 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags` -I$(HOME)/opt/myHealpix/include
@@ -23,14 +23,18 @@ USE_LIB_HEALPIX=create_twopt_table calculate_twopt_correlation_function \
 	calculate_equilateral_threept_correlation_function \
 	calculate_isosceles_threept_correlation_function \
 	calculate_equilateral_fourpt_correlation_function \
-	test_rhombic_quadrilaterals create_rhombic_quadrilaterals_list
+	test_rhombic_quadrilaterals \
+	 create_rhombic_quadrilaterals_list \
+	create_rhombic_quadrilaterals_list_parallel
 # Targets that may use compression
 USE_COMPRESSION=create_twopt_table \
 	calculate_twopt_correlation_function \
 	calculate_equilateral_threept_correlation_function \
 	calculate_isosceles_threept_correlation_function \
 	calculate_equilateral_fourpt_correlation_function \
-	test_rhombic_quadrilaterals create_rhombic_quadrilaterals_list
+	test_rhombic_quadrilaterals \
+	create_rhombic_quadrilaterals_list \
+	create_rhombic_quadrilaterals_list_parallel
 ifdef USE_NO_COMPRESSION
 	override DEFINES+=-DUSE_NO_COMPRESSION
 	COMPRESSION_WRAPPER=No_Compression_Wrapper.h
@@ -50,7 +54,8 @@ endif
 OPENMP_DEFAULT=create_twopt_table calculate_twopt_correlation_function \
 	calculate_equilateral_threept_correlation_function \
 	calculate_isosceles_threept_correlation_function \
-	calculate_equilateral_fourpt_correlation_function
+	calculate_equilateral_fourpt_correlation_function \
+	create_rhombic_quadrilaterals_list_parallel
 # Targets that don't need anything special.
 EXTRA_TARGETS=
 
@@ -112,6 +117,8 @@ test_rhombic_quadrilaterals : \
 	test_rhombic_quadrilaterals.o
 create_rhombic_quadrilaterals_list : \
 	create_rhombic_quadrilaterals_list.o
+create_rhombic_quadrilaterals_list_parallel : \
+	create_rhombic_quadrilaterals_list_parallel.o
 
 # Individual file dependencies
 create_twopt_table.o : create_twopt_table.cpp \
@@ -143,5 +150,9 @@ test_rhombic_quadrilaterals.o : \
 	Npoint_Functions_Utils.h
 create_rhombic_quadrilaterals_list.o : \
 	create_rhombic_quadrilaterals_list.cpp \
+	Twopt_Table.h Pixel_Triangles.h Pixel_Quadrilaterals.h \
+	$(COMPRESSION_WRAPPER)
+create_rhombic_quadrilaterals_list_parallel.o : \
+	create_rhombic_quadrilaterals_list_parallel.cpp \
 	Twopt_Table.h Pixel_Triangles.h Pixel_Quadrilaterals.h \
 	$(COMPRESSION_WRAPPER)
