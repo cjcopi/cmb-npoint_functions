@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# $Id: create_rhombic_quadrilaterals_list.sh,v 1.1 2011-08-11 16:42:48 copi Exp $
+# $Id: create_rhombic_quadrilaterals_list_parallel.sh,v 1.1 2011-08-12 02:24:40 copi Exp $
 
 # This is the companion to the C++ code in
 # create_rhombic_quadrilaterals_list_parallel.cpp
@@ -31,5 +31,5 @@ TMPFILE=data/tmp_rhombic.$$
 # Now that we have the sorted table of unique quadrilaterals we want to
 # compress it into a very terse, easy to use format. Use a python program
 # for this.
-./create_compressed_quadrilateral_table.py \
-	${TPT_FILENAME} ${TMPFILE} ${OUTPUT_QUAD_FILE}
+./create_compressed_quadrilateral_table.py ${TPT_FILENAME} ${TMPFILE} ${OUTPUT_QUAD_FILE} \
+    && /bin/rm ${TMPFILE}
