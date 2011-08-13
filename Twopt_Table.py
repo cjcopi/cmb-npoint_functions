@@ -4,9 +4,9 @@ import zlib
 import numpy as np
 import healpy
 
-# $Id: Twopt_Table.py,v 1.2 2011-07-30 02:29:08 copi Exp $
+# $Id: Twopt_Table.py,v 1.3 2011-08-09 21:06:37 copi Exp $
 
-class Twopt_Table :
+class Twopt_Table (object) :
     """Python class for the storage of a single bin of a two point table.  See
     the C++ version for details.  Only zlib compression and integer tables
     have been implemented."""
