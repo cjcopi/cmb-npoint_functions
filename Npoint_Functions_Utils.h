@@ -12,7 +12,7 @@
 namespace {
   /// @cond IDTAG
   const std::string NPOINT_FUNCTIONS_UTILS_RCSID
-  ("$Id: Npoint_Functions_Utils.h,v 1.6 2011-08-11 20:31:59 copi Exp $");
+  ("$Id: Npoint_Functions_Utils.h,v 1.7 2011-08-13 11:09:48 copi Exp $");
   /// @endcond
 }
 
@@ -80,10 +80,10 @@ namespace Npoint_Functions {
    *  opened for reading.
    */
   std::vector<std::string>
-  get_file_list (const std::string& prefix,
-			    int start, int end,
-			    int digits=5,
-			    const std::string& suffix=".dat")
+  get_range_file_list (const std::string& prefix,
+		       int start, int end,
+		       int digits=5,
+		       const std::string& suffix=".dat")
   {
     std::vector<std::string> files;
     std::ifstream in;
