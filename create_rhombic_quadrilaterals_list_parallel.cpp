@@ -16,9 +16,10 @@
 
 namespace {
   const std::string CREATE_RHOMBIC_QUADRILATERALS_LIST_PARALLEL_RCSID
-  ("$Id: create_rhombic_quadrilaterals_list_parallel.cpp,v 1.1 2011-08-12 02:24:39 copi Exp $");
+  ("$Id: create_rhombic_quadrilaterals_list_parallel.cpp,v 1.2 2011-08-12 15:37:29 copi Exp $");
 }
 
+/// @cond NODOC
 /* Simple vector.  NOT for general use.
  * This is a thin wrapper around raw memory without error checking ....
  */
@@ -63,6 +64,7 @@ private :
       pri.from_pixel (p);
     }
   }
+/// @endcond
 
   inline int pri_frompix ()
   {
