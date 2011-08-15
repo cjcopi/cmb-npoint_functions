@@ -9,10 +9,13 @@
 
 #include <Twopt_Table.h>
 
+#include <healpix_base.h>
+#include <vec3.h>
+
 namespace {
   /// @cond IDTAG
   const std::string NPOINT_FUNCTIONS_UTILS_RCSID
-  ("$Id: Npoint_Functions_Utils.h,v 1.7 2011-08-13 11:09:48 copi Exp $");
+  ("$Id: Npoint_Functions_Utils.h,v 1.8 2011-08-13 14:49:16 copi Exp $");
   /// @endcond
 }
 
