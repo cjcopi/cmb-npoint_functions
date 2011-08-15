@@ -20,7 +20,7 @@
 
 namespace {
   const std::string CALCULATE_LCDM_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_fourpt_correlation_function.cpp,v 1.1 2011-08-15 15:33:36 copi Exp $");
+  ("$Id: calculate_LCDM_fourpt_correlation_function.cpp,v 1.1 2011-08-15 16:35:47 copi Exp $");
 }
 
 
@@ -112,15 +112,6 @@ int main (int argc, char *argv[])
 	std::exit(1);
       }
       if (maps[k].Scheme() != qlf.Scheme()) maps[k].swap_scheme();
-
-#pragma omp critical
-      {
-	std::cerr 
-#ifdef OMP
-	  << omp_get_thread_num() << " "
-#endif       
-	  << k << std::endl;
-      }
 
       bin_list[k] = qlf.bin_value();
       Npoint_Functions::calculate_fourpoint_function_list
