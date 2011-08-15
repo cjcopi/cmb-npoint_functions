@@ -12,7 +12,7 @@
 namespace {
   /// @cond IDTAG
   const std::string QUADRILATERAL_LIST_FILE_RCSID
-  ("$Id: Quadrilateral_List_File.h,v 1.1 2011-08-11 20:31:26 copi Exp $");
+  ("$Id: Quadrilateral_List_File.h,v 1.2 2011-08-12 22:26:27 copi Exp $");
   /// @endcond
 }
 
@@ -75,6 +75,7 @@ namespace Npoint_Functions {
       fd->read (reinterpret_cast<char*>(&binval), sizeof(binval));
       fd->read (reinterpret_cast<char*>(&maxbytes), sizeof(maxbytes));
 
+      if (buf != 0) delete [] buf;
       buf = new T [ maxbytes/sizeof(T) ];
 
       return true;
@@ -123,7 +124,7 @@ namespace Npoint_Functions {
    *  \relates Quadrilateral_List_File
    */
   template<typename TM, typename TL>
-  TM calculate_fourpoint_function (const Healpix_Map<TM>& maps,
+  TM calculate_fourpoint_function (const Healpix_Map<TM>& map,
 				   Quadrilateral_List_File<TL>& qlf)
   {
     size_t ind;
@@ -178,6 +179,7 @@ namespace Npoint_Functions {
    Quadrilateral_List_File<TL>& qlf,
    std::vector<TM>& C4)
   {
+    C4.resize(maps.size());
     std::fill (C4.begin(), C4.end(), 0.0);
 
     size_t ind;
