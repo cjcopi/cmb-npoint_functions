@@ -1,5 +1,4 @@
 #include <iostream>
-#include <iomanip>
 #include <string>
 #include <cmath>
 
@@ -15,14 +14,14 @@
 
 namespace {
   const std::string CALCULATE_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_equilateral_fourpt_correlation_function.cpp,v 1.5 2011-08-10 17:59:44 copi Exp $");
+  ("$Id: calculate_fourpt_correlation_function.cpp,v 1.1 2011-08-15 15:33:36 copi Exp $");
 }
 
 
 void usage (const char *progname)
 {
   std::cerr << "Usage: " << progname << " <map fits file> "
-            << "<quad list filename (should be prefix)>\n";
+            << "<quad list prefix>\n";
   exit (1);
 }
 
@@ -32,8 +31,6 @@ int main (int argc, char *argv[])
   if (argc != 3) usage (argv[0]);
   std::string mapfile = argv[1];
   std::string quad_list_prefix = argv[2];
-
-  Npoint_Functions::Quadrilateral_List_File<int> qlf;
 
   Healpix_Map<double> map;
   read_Healpix_map_from_fits (mapfile, map);
