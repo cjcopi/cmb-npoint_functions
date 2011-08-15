@@ -20,7 +20,7 @@
 
 namespace {
   const std::string CALCULATE_LCDM_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_LCDM_fourpt_correlation_function.cpp,v 1.1 2011-08-15 16:35:47 copi Exp $");
+  ("$Id: calculate_LCDM_fourpt_correlation_function.cpp,v 1.2 2011-08-15 17:29:34 copi Exp $");
 }
 
 
@@ -52,7 +52,7 @@ int main (int argc, char *argv[])
   }
 
   int Lmax;
-  std::vector<Healpix_Map<double> > maps (quad_list_files.size());
+  std::vector<Healpix_Map<double> > maps (Nmaps);
   {
     // Figure out Lmax from the Nside and set up maps.
     Npoint_Functions::Quadrilateral_List_File<int> qlf;
