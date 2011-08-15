@@ -20,7 +20,7 @@
 
 namespace {
   const std::string CALCULATE_LCDM_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_LCDM_fourpt_correlation_function.cpp,v 1.2 2011-08-15 17:29:34 copi Exp $");
+  ("$Id: calculate_LCDM_fourpt_correlation_function.cpp,v 1.3 2011-08-15 18:08:35 copi Exp $");
 }
 
 
@@ -52,11 +52,13 @@ int main (int argc, char *argv[])
   }
 
   int Lmax;
+  Healpix_Ordering_Scheme qlf_scheme;
   std::vector<Healpix_Map<double> > maps (Nmaps);
   {
     // Figure out Lmax from the Nside and set up maps.
     Npoint_Functions::Quadrilateral_List_File<int> qlf;
     qlf.initialize (quad_list_files[0]);
+    qlf_scheme = qlf.Scheme();
     Lmax = std::min (2000UL, 4*qlf.Nside()+1);
     for (size_t j=0; j < maps.size(); ++j) {
       // alm2map REQUIRES the map to be in RING order.
@@ -67,11 +69,11 @@ int main (int argc, char *argv[])
   read_powspec_from_fits (clfile, cl, 1, Lmax);
 
   // Make the maps
-#pragma omp parallel shared(cl, maps)
+#pragma omp parallel shared(cl, maps, Lmax)
   {
     planck_rng rng;
     /* Seed with random values.  Make sure the threads don't stomp on each
-     * other by making this section critical. */
+     * other by making the seeding section critical. */
 #pragma omp critical
     {
       unsigned int seed[4];
@@ -86,6 +88,7 @@ int main (int argc, char *argv[])
     for (size_t k=0; k < maps.size(); ++k) {
       create_alm (cl, alm, rng);
       alm2map (alm, maps[k]);
+      if (maps[k].Scheme() != qlf_scheme) maps[k].swap_scheme();
     }
   }
 
@@ -105,13 +108,6 @@ int main (int argc, char *argv[])
 		  << quad_list_files[k] << std::endl;
 	std::exit(1);
       }
-      if (maps[k].Nside() != qlf.Nside()) {
-	std::cerr << "Map has Nside = " << maps[k].Nside()
-		  << " but quad list has Nside = " << qlf.Nside()
-		  << "\nGiving up!\n";
-	std::exit(1);
-      }
-      if (maps[k].Scheme() != qlf.Scheme()) maps[k].swap_scheme();
 
       bin_list[k] = qlf.bin_value();
       Npoint_Functions::calculate_fourpoint_function_list
