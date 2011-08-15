@@ -12,7 +12,7 @@
 namespace {
   /// @cond IDTAG
   const std::string QUADRILATERAL_LIST_FILE_RCSID
-  ("$Id: Quadrilateral_List_File.h,v 1.2 2011-08-12 22:26:27 copi Exp $");
+  ("$Id: Quadrilateral_List_File.h,v 1.3 2011-08-15 03:46:47 copi Exp $");
   /// @endcond
 }
 
@@ -224,6 +224,66 @@ namespace Npoint_Functions {
       for (size_t j=0; j < C4.size(); ++j)
 	C4[j] /= Nquad;
     }
+  }
+
+  /** Calculate the four point function from a masked sky.
+   *  Use a Quadrilateral_List_File to calculate the four point function
+   *  for the provided HEALPix map.  It is \b assumed that the scheme of
+   *  the map, mask, and quadrilateral list are all the same.
+   *
+   *  This routine uses the full sky quadrilateral list and only evaluates
+   *  it where the sky is not masked.  This is not optimal.  In practice it
+   *  would be better to use a masked quadrilateral list.
+   *
+   *  \relates Quadrilateral_List_File
+   */
+  template<typename TM, typename TL>
+  TM calculate_masked_fourpoint_function (const Healpix_Map<TM>& map,
+					  const Healpix_Map<TM>& mask,
+					  Quadrilateral_List_File<TL>& qlf)
+  {
+    size_t ind;
+    TL p[4];
+    TL N[4];
+    TL *arr;
+    size_t Nquad = 0;
+    TM C[4];
+    C[0] = 0.0;
+
+    while ((arr = qlf.next()) != 0) {
+      if (mask[p[0]] == 0) continue; // Skip them all
+      ind = 0;
+      p[0] = arr[ind++];
+      N[1] = arr[ind++];
+      C[1] = 0.0;
+      for (int n1=0; n1 < N[1]; ++n1) {
+	p[1] = arr[ind++];
+	N[2] = arr[ind++];
+	C[2] = 0.0;
+	for (int n2=0; n2 < N[2]; ++n2) {
+	  p[2] = arr[ind++];
+	  N[3] = arr[ind++];
+	  if ((mask[p[1]] == 0) || (mask[p[2]] == 0)) {
+	    // Short circuit.  We know we can skip ahead.
+	    ind += N[3];
+	    continue;
+	  }
+	  C[3] = 0.0;
+	  for (int n3=0; n3 < N[3]; ++n3) {
+	    if (mask[arr[ind]] != 0) {
+	      C[3] += map[arr[ind++]];
+	      ++Nquad;
+	    }
+	  }
+	  C[2] += map[p[2]] * C[3];
+	}
+	C[1] += map[p[1]] * C[2];
+      }
+      C[0] += map[p[0]] * C[1];
+    }
+
+    if (Nquad > 0) C[0] /= Nquad;
+    return C[0];
   }
 }
 
