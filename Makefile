@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.21 2011-08-10 18:56:28 copi Exp $
+# $Id: Makefile,v 1.22 2011-08-12 02:31:13 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags` -I$(HOME)/opt/myHealpix/include
@@ -22,16 +22,16 @@ OPTIMIZE=-O3 -ffast-math -fomit-frame-pointer -Wall -W
 USE_LIB_HEALPIX=create_twopt_table calculate_twopt_correlation_function \
 	calculate_equilateral_threept_correlation_function \
 	calculate_isosceles_threept_correlation_function \
-	calculate_equilateral_fourpt_correlation_function \
+	calculate_fourpt_correlation_function \
 	test_rhombic_quadrilaterals \
-	 create_rhombic_quadrilaterals_list \
+	create_rhombic_quadrilaterals_list \
 	create_rhombic_quadrilaterals_list_parallel
 # Targets that may use compression
 USE_COMPRESSION=create_twopt_table \
 	calculate_twopt_correlation_function \
 	calculate_equilateral_threept_correlation_function \
 	calculate_isosceles_threept_correlation_function \
-	calculate_equilateral_fourpt_correlation_function \
+	calculate_fourpt_correlation_function \
 	test_rhombic_quadrilaterals \
 	create_rhombic_quadrilaterals_list \
 	create_rhombic_quadrilaterals_list_parallel
@@ -54,7 +54,7 @@ endif
 OPENMP_DEFAULT=create_twopt_table calculate_twopt_correlation_function \
 	calculate_equilateral_threept_correlation_function \
 	calculate_isosceles_threept_correlation_function \
-	calculate_equilateral_fourpt_correlation_function \
+	calculate_fourpt_correlation_function \
 	create_rhombic_quadrilaterals_list_parallel
 # Targets that don't need anything special.
 EXTRA_TARGETS=
@@ -111,8 +111,8 @@ calculate_equilateral_threept_correlation_function : \
 	calculate_equilateral_threept_correlation_function.o
 calculate_isosceles_threept_correlation_function : \
 	calculate_isosceles_threept_correlation_function.o
-calculate_equilateral_fourpt_correlation_function : \
-	calculate_equilateral_fourpt_correlation_function.o
+calculate_fourpt_correlation_function : \
+	calculate_fourpt_correlation_function.o
 test_rhombic_quadrilaterals : \
 	test_rhombic_quadrilaterals.o
 create_rhombic_quadrilaterals_list : \
@@ -138,9 +138,9 @@ calculate_isosceles_threept_correlation_function.o : \
 	Twopt_Table.h Pixel_Triangles.h \
 	$(COMPRESSION_WRAPPER) \
 	Npoint_Functions_Utils.h
-calculate_equilateral_fourpt_correlation_function.o : \
-	calculate_equilateral_fourpt_correlation_function.cpp \
-	Twopt_Table.h Pixel_Triangles.h \
+calculate_fourpt_correlation_function.o : \
+	calculate_fourpt_correlation_function.cpp \
+	Quadrilateral_List_File.h \
 	$(COMPRESSION_WRAPPER) \
 	Npoint_Functions_Utils.h
 test_rhombic_quadrilaterals.o : \
