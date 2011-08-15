@@ -6,7 +6,7 @@
 #include <fstream>
 #include <tr1/memory> // For std::tr1::shared_ptr
 
-#include <healpix_tables.h> // For Healpix_Ordering_Scheme
+#include <healpix_base.h> // For Healpix_Ordering_Scheme
 
 #if defined(USE_NO_COMPRESSION)
 #  include <No_Compression_Wrapper.h>
@@ -19,7 +19,7 @@
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.19 2011-08-08 20:06:39 copi Exp $");
+  ("$Id: Twopt_Table.h,v 1.20 2011-08-09 21:06:00 copi Exp $");
   /// @endcond
 }
 

@@ -5,7 +5,7 @@
 #include <string>
 
 #include <Pixel_Triangles.h>
-#include <healpix_tables.h>
+#include <healpix_base.h>
 
 #include <pixel_ringinfo.h>
 #include <pixel_tools.h>
@@ -13,7 +13,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_QUADRILATERALS_RCSID
-  ("$Id: Pixel_Quadrilaterals.h,v 1.3 2011-08-10 17:59:44 copi Exp $");
+  ("$Id: Pixel_Quadrilaterals.h,v 1.4 2011-08-11 16:23:48 copi Exp $");
   /// @endcond
 }
 

@@ -5,7 +5,6 @@
 #include <string>
 
 #include <healpix_base.h>
-#include <healpix_tables.h>
 #include <vec3.h>
 
 #include <Npoint_Functions_Utils.h>
@@ -13,7 +12,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.22 2011-08-09 21:10:09 copi Exp $");
+  ("$Id: Pixel_Triangles.h,v 1.23 2011-08-09 21:46:23 copi Exp $");
   /// @endcond
 }
 
