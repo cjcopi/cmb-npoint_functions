@@ -12,7 +12,7 @@
 namespace {
   /// @cond IDTAG
   const std::string QUADRILATERAL_LIST_FILE_RCSID
-  ("$Id: Quadrilateral_List_File.h,v 1.3 2011-08-15 03:46:47 copi Exp $");
+  ("$Id: Quadrilateral_List_File.h,v 1.4 2011-08-15 22:34:43 copi Exp $");
   /// @endcond
 }
 
@@ -285,6 +285,79 @@ namespace Npoint_Functions {
     if (Nquad > 0) C[0] /= Nquad;
     return C[0];
   }
+
+  /** Calculate the four point function for a list of maps from a masked sky.
+      *  Use a Quadrilateral_List_File to calculate the four point function
+      *  for the provided list of HEALPix maps.  It is \b assumed that the
+      *  scheme of the maps is the same as that of the quadrilateral list.
+      *
+      *  This is a specialized version of calculate_fourpoint_function_list()
+      *  optimized for more than one map at a time.
+      *
+      *  \relates Quadrilateral_List_File
+      */
+  template<typename TM, typename TL>
+  void calculate_masked_fourpoint_function_list
+  (const std::vector<Healpix_Map<TM> >& maps,
+   const std::vector<Healpix_Map<TM> >& mask,
+   Quadrilateral_List_File<TL>& qlf,
+   std::vector<TM>& C4)
+  {
+    C4.resize(maps.size());
+    std::fill (C4.begin(), C4.end(), 0.0);
+
+    size_t ind;
+    TL p[4];
+    TL N[4];
+    TL *arr;
+    size_t Nquad = 0;
+    // Temporary storage space
+    std::vector<TM> C1(maps.size());
+    std::vector<TM> C2(maps.size());
+    std::vector<TM> C3(maps.size());
+
+    while ((arr = qlf.next()) != 0) {
+      if (mask[p[0]] == 0) continue; // Skip them all
+      ind = 0;
+      p[0] = arr[ind++];
+      N[1] = arr[ind++];
+      std::fill (C1.begin(), C1.end(), 0.0);
+      for (int n1=0; n1 < N[1]; ++n1) {
+	p[1] = arr[ind++];
+	N[2] = arr[ind++];
+	std::fill (C2.begin(), C2.end(), 0.0);
+	for (int n2=0; n2 < N[2]; ++n2) {
+	  p[2] = arr[ind++];
+	  N[3] = arr[ind++];
+	  if ((mask[p[1]] == 0) || (mask[p[2]] == 0)) {
+	    // Short circuit.  We know we can skip ahead.
+	    ind += N[3];
+	    continue;
+	  }
+	  std::fill (C3.begin(), C3.end(), 0.0);
+	  for (int n3=0; n3 < N[3]; ++n3) {
+	    if (mask[arr[ind]] != 0) {
+	      for (size_t j=0; j < C3.size(); ++j)
+		C3[j] += maps[j][arr[ind]];
+	      ++Nquad;
+	    }
+	    ++ind;
+	  }
+	  for (size_t j=0; j < C2.size(); ++j)
+	    C2[j] += maps[j][p[2]] * C3[j];
+	}
+	for (size_t j=0; j < C2.size(); ++j)
+	  C1[j] += maps[j][p[1]] * C2[j];
+      }
+      for (size_t j=0; j < C4.size(); ++j)
+	C4[j] += maps[j][p[0]] * C1[j];
+    }
+    if (Nquad > 0) {
+      for (size_t j=0; j < C4.size(); ++j)
+	C4[j] /= Nquad;
+    }
+  }
+
 }
 
 #endif
