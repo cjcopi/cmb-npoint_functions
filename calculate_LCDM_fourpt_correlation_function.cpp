@@ -20,7 +20,7 @@
 
 namespace {
   const std::string CALCULATE_LCDM_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_LCDM_fourpt_correlation_function.cpp,v 1.3 2011-08-15 18:08:35 copi Exp $");
+  ("$Id: calculate_LCDM_fourpt_correlation_function.cpp,v 1.4 2011-08-15 22:16:21 copi Exp $");
 }
 
 
@@ -69,7 +69,7 @@ int main (int argc, char *argv[])
   read_powspec_from_fits (clfile, cl, 1, Lmax);
 
   // Make the maps
-#pragma omp parallel shared(cl, maps, Lmax)
+#pragma omp parallel shared(cl, maps)
   {
     planck_rng rng;
     /* Seed with random values.  Make sure the threads don't stomp on each
@@ -83,7 +83,7 @@ int main (int argc, char *argv[])
       inseed.close();
       rng.seed (seed[0], seed[1], seed[2], seed[3]);
     }
-    Alm<xcomplex<double> > alm (Lmax);
+    Alm<xcomplex<double> > alm (cl.Lmax(), cl.Lmax());
 #pragma omp for schedule(static)
     for (size_t k=0; k < maps.size(); ++k) {
       create_alm (cl, alm, rng);
