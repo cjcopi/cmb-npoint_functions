@@ -20,7 +20,7 @@
 
 namespace {
   const std::string CALCULATE_LCDM_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_LCDM_fourpt_correlation_function.cpp,v 1.4 2011-08-15 22:16:21 copi Exp $");
+  ("$Id: calculate_LCDM_fourpt_correlation_function.cpp,v 1.5 2011-08-16 02:32:32 copi Exp $");
 }
 
 
@@ -45,7 +45,7 @@ int main (int argc, char *argv[])
 
   // Figure out how many bins there are by trying to open files.
   std::vector<std::string> quad_list_files
-    = Npoint_Functions::get_range_file_list(quad_list_prefix, 0, 180);
+    = Npoint_Functions::get_range_file_list(quad_list_prefix, 0, 400);
   if (quad_list_files.size() == 0) {
     std::cerr << "No quad list files found!\n";
     usage (argv[0]);
