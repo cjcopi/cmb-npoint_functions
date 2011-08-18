@@ -12,7 +12,7 @@
 namespace {
   /// @cond IDTAG
   const std::string QUADRILATERAL_LIST_FILE_RCSID
-  ("$Id: Quadrilateral_List_File.h,v 1.4 2011-08-15 22:34:43 copi Exp $");
+  ("$Id: Quadrilateral_List_File.h,v 1.5 2011-08-15 23:42:04 copi Exp $");
   /// @endcond
 }
 
@@ -227,9 +227,7 @@ namespace Npoint_Functions {
   }
 
   /** Calculate the four point function from a masked sky.
-   *  Use a Quadrilateral_List_File to calculate the four point function
-   *  for the provided HEALPix map.  It is \b assumed that the scheme of
-   *  the map, mask, and quadrilateral list are all the same.
+   *  Same as calculate_fourpoint_function() but also uses a mask.
    *
    *  This routine uses the full sky quadrilateral list and only evaluates
    *  it where the sky is not masked.  This is not optimal.  In practice it
