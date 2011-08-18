@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.23 2011-08-15 15:33:00 copi Exp $
+# $Id: Makefile,v 1.24 2011-08-15 16:36:17 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags` -I$(HOME)/opt/myHealpix/include
@@ -24,6 +24,7 @@ USE_LIB_HEALPIX=create_twopt_table calculate_twopt_correlation_function \
 	calculate_isosceles_threept_correlation_function \
 	calculate_fourpt_correlation_function \
 	calculate_LCDM_fourpt_correlation_function \
+	calculate_constrained_fourpt_correlation_function \
 	test_rhombic_quadrilaterals \
 	create_rhombic_quadrilaterals_list \
 	create_rhombic_quadrilaterals_list_parallel
@@ -56,6 +57,7 @@ OPENMP_DEFAULT=create_twopt_table calculate_twopt_correlation_function \
 	calculate_isosceles_threept_correlation_function \
 	calculate_fourpt_correlation_function \
 	calculate_LCDM_fourpt_correlation_function \
+	calculate_constrained_fourpt_correlation_function \
 	create_rhombic_quadrilaterals_list_parallel
 # Targets that don't need anything special.
 EXTRA_TARGETS=
@@ -116,6 +118,8 @@ calculate_fourpt_correlation_function : \
 	calculate_fourpt_correlation_function.o
 calculate_LCDM_fourpt_correlation_function : \
 	calculate_LCDM_fourpt_correlation_function.o
+calculate_constrained_fourpt_correlation_function : \
+	calculate_constrained_fourpt_correlation_function.o
 test_rhombic_quadrilaterals : \
 	test_rhombic_quadrilaterals.o
 create_rhombic_quadrilaterals_list : \
@@ -147,6 +151,10 @@ calculate_fourpt_correlation_function.o : \
 	Npoint_Functions_Utils.h
 calculate_LCDM_fourpt_correlation_function.o : \
 	calculate_LCDM_fourpt_correlation_function.cpp \
+	Quadrilateral_List_File.h \
+	Npoint_Functions_Utils.h
+calculate_constrained_fourpt_correlation_function.o : \
+	calculate_constrained_fourpt_correlation_function.cpp \
 	Quadrilateral_List_File.h \
 	Npoint_Functions_Utils.h
 test_rhombic_quadrilaterals.o : \
