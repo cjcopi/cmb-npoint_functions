@@ -66,16 +66,20 @@ class compress_quad_list (object) :
         self.count = np.zeros(4, dtype=np.int)
 
     def _split_line (self, line) :
-        return map (lambda x : int(x), re.split ('\s+', line.strip()))
+        s = re.split ('\s+', line.strip())
+        if s is None or len(s) != 4 : return None
+        return map (lambda x : int(x), s)
 
     def initialize (self, line) :
         pts = self._split_line (line)
+        if pts is None : return False
         self.prev = np.asarray(pts, dtype=np.int)
         for j in range(len(self.res)) :
             self.res[j] = np.array([], dtype=np.int)
             self.count[j] = 1
         # Yes, this one is treated special
         self.res[3] = np.array([pts[3]], dtype=np.int)
+	return True
 
     def next_line (self, line) :
         pts = self._split_line (line)
@@ -128,15 +132,15 @@ fp_quad_in = open (sys.argv[2], "r")
 qlf = quadrilateral_list_file (sys.argv[3], tpt)
 
 cql = compress_quad_list()
-cql.initialize (fp_quad_in.readline())
-for line in fp_quad_in :
-    res = cql.next_line (line)
-    if res is not None :
-        qlf.add_entry (res)
+if cql.initialize (fp_quad_in.readline()) :
+    for line in fp_quad_in :
+        res = cql.next_line (line)
+        if res is not None :
+            qlf.add_entry (res)
+    res = cql.finalize()
+    qlf.add_entry (res)
 
 fp_quad_in.close()
 
-res = cql.finalize()
-qlf.add_entry (res)
 
 
