@@ -14,7 +14,7 @@
 
 namespace {
   const std::string CALCULATE_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_fourpt_correlation_function.cpp,v 1.1 2011-08-15 15:33:36 copi Exp $");
+  ("$Id: calculate_fourpt_correlation_function.cpp,v 1.2 2011-08-15 15:40:36 copi Exp $");
 }
 
 
@@ -55,7 +55,7 @@ int main (int argc, char *argv[])
 		  << quad_list_files[k] << std::endl;
 	std::exit(1);
       }
-      if (map.Nside() != qlf.Nside()) {
+      if (static_cast<size_t>(map.Nside()) != qlf.Nside()) {
 	std::cerr << "Map has Nside = " << map.Nside()
 		  << " but quad list has Nside = " << qlf.Nside()
 		  << "\nGiving up!\n";
