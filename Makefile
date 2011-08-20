@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.24 2011-08-15 16:36:17 copi Exp $
+# $Id: Makefile,v 1.25 2011-08-18 18:11:31 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags` -I$(HOME)/opt/myHealpix/include
@@ -16,7 +16,7 @@ override INCLUDES+=-I.
 # that programs can use this for conditional inclusion of code.
 OPENMP=-DOMP -fopenmp
 
-OPTIMIZE=-O3 -ffast-math -fomit-frame-pointer -Wall -W
+OPTIMIZE=-O3 -ffast-math -fomit-frame-pointer -Wall -Wextra -Wno-unknown-pragmas
 
 # Special handling of targets
 USE_LIB_HEALPIX=create_twopt_table calculate_twopt_correlation_function \
