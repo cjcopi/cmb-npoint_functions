@@ -14,27 +14,32 @@
 
 namespace {
   const std::string CALCULATE_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_fourpt_correlation_function.cpp,v 1.2 2011-08-15 15:40:36 copi Exp $");
+  ("$Id: calculate_fourpt_correlation_function.cpp,v 1.3 2011-08-20 01:04:38 copi Exp $");
 }
 
 
 void usage (const char *progname)
 {
   std::cerr << "Usage: " << progname << " <map fits file> "
-            << "<quad list prefix>\n";
+            << "<quad list prefix> [<mask file>]\n";
   exit (1);
 }
 
 
 int main (int argc, char *argv[])
 {
-  if (argc != 3) usage (argv[0]);
+  if ((argc < 3) || (argc > 4)) usage (argv[0]);
   std::string mapfile = argv[1];
   std::string quad_list_prefix = argv[2];
 
   Healpix_Map<double> map;
   read_Healpix_map_from_fits (mapfile, map);
-
+  bool have_mask = false;
+  Healpix_Map<double> mask;
+  if (argc == 4) {
+    read_Healpix_map_from_fits (argv[3], mask);
+    have_mask = true;
+  }
 
   // Figure out how many bins there are by trying to open files.
   std::vector<std::string> quad_list_files
@@ -62,6 +67,15 @@ int main (int argc, char *argv[])
 	std::exit(1);
       }
       if (map.Scheme() != qlf.Scheme()) map.swap_scheme();
+      if (have_mask) {
+	if (static_cast<size_t>(mask.Nside()) != qlf.Nside()) {
+	  std::cerr << "Mask and quadrilateral lists do not have"
+		    << " the same Nside: " << mask.Nside() 
+		    << " != " << qlf.Nside() << std::endl;
+	  std::exit(1);
+	}
+	if (mask.Scheme() != qlf.Scheme()) mask.swap_scheme();
+      }
 
 #pragma omp critical
       {
@@ -73,7 +87,11 @@ int main (int argc, char *argv[])
       }
 
       bin_list[k] = qlf.bin_value();
-      Corr[k] = calculate_fourpoint_function (map, qlf);
+      if (have_mask) {
+	Corr[k] = calculate_masked_fourpoint_function (map, mask, qlf);
+      } else {
+	Corr[k] = calculate_fourpoint_function (map, qlf);
+      }
     }
   }
   
