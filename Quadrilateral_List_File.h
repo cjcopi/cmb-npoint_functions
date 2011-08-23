@@ -12,7 +12,7 @@
 namespace {
   /// @cond IDTAG
   const std::string QUADRILATERAL_LIST_FILE_RCSID
-  ("$Id: Quadrilateral_List_File.h,v 1.5 2011-08-15 23:42:04 copi Exp $");
+  ("$Id: Quadrilateral_List_File.h,v 1.6 2011-08-18 18:10:14 copi Exp $");
   /// @endcond
 }
 
@@ -285,19 +285,19 @@ namespace Npoint_Functions {
   }
 
   /** Calculate the four point function for a list of maps from a masked sky.
-      *  Use a Quadrilateral_List_File to calculate the four point function
-      *  for the provided list of HEALPix maps.  It is \b assumed that the
-      *  scheme of the maps is the same as that of the quadrilateral list.
-      *
-      *  This is a specialized version of calculate_fourpoint_function_list()
-      *  optimized for more than one map at a time.
-      *
-      *  \relates Quadrilateral_List_File
-      */
+   *  Use a Quadrilateral_List_File to calculate the four point function
+   *  for the provided list of HEALPix maps.  It is \b assumed that the
+   *  scheme of the maps is the same as that of the quadrilateral list.
+   *
+   *  This is a specialized version of calculate_fourpoint_function_list()
+   *  optimized for more than one map at a time.
+   *
+   *  \relates Quadrilateral_List_File
+   */
   template<typename TM, typename TL>
   void calculate_masked_fourpoint_function_list
   (const std::vector<Healpix_Map<TM> >& maps,
-   const std::vector<Healpix_Map<TM> >& mask,
+   const Healpix_Map<TM>& mask,
    Quadrilateral_List_File<TL>& qlf,
    std::vector<TM>& C4)
   {
@@ -315,7 +315,7 @@ namespace Npoint_Functions {
     std::vector<TM> C3(maps.size());
 
     while ((arr = qlf.next()) != 0) {
-      if (mask[p[0]] == 0) continue; // Skip them all
+      if (mask[arr[0]] == 0) continue; // Skip them all
       ind = 0;
       p[0] = arr[ind++];
       N[1] = arr[ind++];
