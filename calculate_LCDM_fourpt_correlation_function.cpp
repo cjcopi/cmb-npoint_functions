@@ -8,6 +8,7 @@
 #endif
 
 #include <healpix_map.h>
+#include <healpix_map_fitsio.h>
 #include <alm.h>
 #include <alm_healpix_tools.h>
 #include <alm_powspec_tools.h>
@@ -20,27 +21,34 @@
 
 namespace {
   const std::string CALCULATE_LCDM_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_LCDM_fourpt_correlation_function.cpp,v 1.5 2011-08-16 02:32:32 copi Exp $");
+  ("$Id: calculate_LCDM_fourpt_correlation_function.cpp,v 1.6 2011-08-17 18:17:15 copi Exp $");
 }
 
 
 void usage (const char *progname)
 {
-  std::cerr << "Usage: " << progname << " <cl fits file> "
-            << "<quad list prefix> <num maps to generate>\n";
+  std::cerr << "Usage: " << progname << " <cl fits file>"
+            << " <quad list prefix> <num maps to generate>"
+	    << " [<mask file>>]\n";
   exit (1);
 }
 
 
 int main (int argc, char *argv[])
 {
-  if (argc != 4) usage (argv[0]);
+  if ((argc < 4) || (argc > 5)) usage (argv[0]);
   std::string clfile = argv[1];
   std::string quad_list_prefix = argv[2];
   size_t Nmaps;
   if (! Npoint_Functions::from_string (argv[3], Nmaps)) {
     std::cerr << "Could not parse Nmaps\n";
     usage (argv[0]);
+  }
+  bool have_mask = false;
+  Healpix_Map<double> mask;
+  if (argc == 5) {
+    read_Healpix_map_from_fits (argv[4], mask);
+    have_mask = true;
   }
 
   // Figure out how many bins there are by trying to open files.
@@ -58,6 +66,15 @@ int main (int argc, char *argv[])
     // Figure out Lmax from the Nside and set up maps.
     Npoint_Functions::Quadrilateral_List_File<int> qlf;
     qlf.initialize (quad_list_files[0]);
+    if (have_mask) {
+      if (static_cast<size_t>(mask.Nside()) != qlf.Nside()) {
+	std::cerr << "Mask and quadrilateral lists do not have"
+		  << " the same Nside: " << mask.Nside() 
+		  << " != " << qlf.Nside() << std::endl;
+	std::exit(1);
+      }
+      if (mask.Scheme() != qlf.Scheme()) mask.swap_scheme();
+    }
     qlf_scheme = qlf.Scheme();
     Lmax = std::min (2000UL, 4*qlf.Nside()+1);
     for (size_t j=0; j < maps.size(); ++j) {
@@ -69,7 +86,7 @@ int main (int argc, char *argv[])
   read_powspec_from_fits (clfile, cl, 1, Lmax);
 
   // Make the maps
-#pragma omp parallel shared(cl, maps)
+#pragma omp parallel shared(cl, maps, mask)
   {
     planck_rng rng;
     /* Seed with random values.  Make sure the threads don't stomp on each
@@ -110,8 +127,13 @@ int main (int argc, char *argv[])
       }
 
       bin_list[k] = qlf.bin_value();
-      Npoint_Functions::calculate_fourpoint_function_list
-	(maps, qlf, Corr[k]);
+      if (have_mask) {
+	Npoint_Functions::calculate_masked_fourpoint_function_list
+	  (maps, mask, qlf, Corr[k]);
+      } else {
+	Npoint_Functions::calculate_fourpoint_function_list
+	  (maps, qlf, Corr[k]);
+      }
     }
   }
   

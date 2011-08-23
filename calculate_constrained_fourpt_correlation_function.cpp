@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include <healpix_map.h>
+#include <healpix_map_fitsio.h>
 #include <alm.h>
 #include <alm_healpix_tools.h>
 #include <alm_fitsio.h>
@@ -15,7 +16,7 @@
 
 namespace {
   const std::string CALCULATE_constrained_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_LCDM_fourpt_correlation_function.cpp,v 1.6 2011-08-17 18:17:15 copi Exp $");
+  ("$Id: calculate_constrained_fourpt_correlation_function.cpp,v 1.1 2011-08-18 18:11:31 copi Exp $");
 }
 
 
@@ -23,14 +24,15 @@ void usage (const char *progname)
 {
   std::cerr << "Usage: " << progname
             << " <quad list prefix> <Alm dir>"
-	    << " <num alm start> <num alm end>\n";
+	    << " <num alm start> <num alm end>"
+	    << " [<mask file>>]\n";
   exit (1);
 }
 
 
 int main (int argc, char *argv[])
 {
-  if (argc != 5) usage (argv[0]);
+  if ((argc < 5) || (argc > 6)) usage (argv[0]);
   std::string quad_list_prefix = argv[1];
   std::string alm_dir = argv[2];
   size_t Nstart, Nend;
@@ -41,6 +43,12 @@ int main (int argc, char *argv[])
   if (! Npoint_Functions::from_string (argv[4], Nend)) {
     std::cerr << "Could not parse Nend\n";
     usage (argv[0]);
+  }
+  bool have_mask = false;
+  Healpix_Map<double> mask;
+  if (argc == 6) {
+    read_Healpix_map_from_fits (argv[5], mask);
+    have_mask = true;
   }
 
   // Figure out how many bins there are by trying to open files.
@@ -57,11 +65,20 @@ int main (int argc, char *argv[])
   {
     Npoint_Functions::Quadrilateral_List_File<int> qlf;
     qlf.initialize (quad_list_files[0]);
+    if (have_mask) {
+      if (static_cast<size_t>(mask.Nside()) != qlf.Nside()) {
+	std::cerr << "Mask and quadrilateral lists do not have"
+		  << " the same Nside: " << mask.Nside() 
+		  << " != " << qlf.Nside() << std::endl;
+	std::exit(1);
+      }
+      if (mask.Scheme() != qlf.Scheme()) mask.swap_scheme();
+    }
     Lmax = std::min(200UL, 4*qlf.Nside()+1);
-#pragma omp parallel shared(qlf, maps)
+    //#pragma omp parallel shared(qlf, maps)
     {
       Alm<xcomplex<double> > alm (Lmax, Lmax);
-#pragma omp for schedule(static)
+      //#pragma omp for schedule(static)
       for (size_t k=0; k < maps.size(); ++k) {
 	read_Alm_from_fits (dirtree::filename(alm_dir, "alm_T_", ".fits",
 					      k+Nstart),
@@ -78,7 +95,7 @@ int main (int argc, char *argv[])
    * first index. */
   std::vector<std::vector<double> > Corr(quad_list_files.size());
 
-#pragma omp parallel shared(Corr, bin_list, quad_list_files, maps)
+#pragma omp parallel shared(Corr, bin_list, quad_list_files, maps, mask)
   {
     Npoint_Functions::Quadrilateral_List_File<int> qlf;
     
@@ -91,8 +108,13 @@ int main (int argc, char *argv[])
       }
 
       bin_list[k] = qlf.bin_value();
-      Npoint_Functions::calculate_fourpoint_function_list
-	(maps, qlf, Corr[k]);
+      if (have_mask) {
+	Npoint_Functions::calculate_masked_fourpoint_function_list
+	  (maps, mask, qlf, Corr[k]);
+      } else {
+	Npoint_Functions::calculate_fourpoint_function_list
+	  (maps, qlf, Corr[k]);
+      }
     }
   }
   
