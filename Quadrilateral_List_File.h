@@ -12,7 +12,7 @@
 namespace {
   /// @cond IDTAG
   const std::string QUADRILATERAL_LIST_FILE_RCSID
-  ("$Id: Quadrilateral_List_File.h,v 1.6 2011-08-18 18:10:14 copi Exp $");
+  ("$Id: Quadrilateral_List_File.h,v 1.7 2011-08-23 19:50:02 copi Exp $");
   /// @endcond
 }
 
@@ -249,7 +249,7 @@ namespace Npoint_Functions {
     C[0] = 0.0;
 
     while ((arr = qlf.next()) != 0) {
-      if (mask[p[0]] == 0) continue; // Skip them all
+      if (mask[arr[0]] == 0) continue; // Skip them all
       ind = 0;
       p[0] = arr[ind++];
       N[1] = arr[ind++];
