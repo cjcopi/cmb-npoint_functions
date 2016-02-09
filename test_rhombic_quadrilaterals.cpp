@@ -7,7 +7,7 @@
 #include <Pixel_Quadrilaterals.h>
 #include <Npoint_Functions_Utils.h>
 
-// $Id: test_rhombic_quadrilaterals.cpp,v 1.1 2011-08-08 20:05:37 copi Exp $
+// $Id$
 
 int main ()
 {

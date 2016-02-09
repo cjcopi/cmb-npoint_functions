@@ -12,7 +12,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id: Pixel_Triangles.h,v 1.23 2011-08-09 21:46:23 copi Exp $");
+  ("$Id$");
   /// @endcond
 }
 
@@ -177,7 +177,7 @@ namespace Npoint_Functions {
 			  &t3(i2,0), &t3(i2,t3.Nmax()), trip);
 	  // Now put all the triplets in the list.
 	  for (size_t k=0; k < trip.size(); ++k) {
-	    add (p1, p2, t1.pixel_list(trip[k]));
+	    this->add (p1, p2, t1.pixel_list(trip[k]));
 	  }
 	}
       }
@@ -267,7 +267,7 @@ namespace Npoint_Functions {
 			  &tequal(i2,0), &tequal(i2,tequal.Nmax()), trip);
 	  // Now put all the triplets in the list.
 	  for (size_t k=0; k < trip.size(); ++k) {
-	    add (p1, p2, tequal.pixel_list(trip[k]));
+	    this->add (p1, p2, tequal.pixel_list(trip[k]));
 	  }
 	}
       }
@@ -312,7 +312,7 @@ namespace Npoint_Functions {
 			  &t(i2,0), &t(i2,t.Nmax()), trip);
 	  // Now put all the triplets in the list.
 	  for (size_t k=0; k < trip.size(); ++k) {
-	    add (p1, p2, t.pixel_list(trip[k]));
+	    this->add (p1, p2, t.pixel_list(trip[k]));
 	  }
 	}
       }

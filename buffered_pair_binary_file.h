@@ -8,7 +8,7 @@
 namespace {
   /// @cond IDTAG
   const std::string BUFFERED_PAIR_BINARY_FILE_RCSID
-  ("$Id: buffered_pair_binary_file.h,v 1.3 2011-07-15 16:16:23 copi Exp $");
+  ("$Id$");
   /// @endcond
 }
 

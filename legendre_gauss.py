@@ -2,7 +2,7 @@
 Legendre-Gauss quadrature.  These routines are not optimized but work fast
 enough for l ~ 500 that I am not worried about speeding them up."""
 
-# $Id: legendre_gauss.py,v 1.2 2011-07-08 05:54:57 copi Exp $
+# $Id$
 
 import scipy.special as sf
 import scipy.optimize as opt

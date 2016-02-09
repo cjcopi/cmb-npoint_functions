@@ -8,7 +8,7 @@
 
 namespace {
   const std::string CREATE_RHOMBIC_QUADRILATERALS_LIST_RCSID
-  ("$Id: create_rhombic_quadrilaterals_list.cpp,v 1.1 2011-08-10 18:46:10 copi Exp $");
+  ("$Id$");
 }
 
 void usage (const char *progname)

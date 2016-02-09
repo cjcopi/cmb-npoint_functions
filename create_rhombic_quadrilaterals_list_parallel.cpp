@@ -16,7 +16,7 @@
 
 namespace {
   const std::string CREATE_RHOMBIC_QUADRILATERALS_LIST_PARALLEL_RCSID
-  ("$Id: create_rhombic_quadrilaterals_list_parallel.cpp,v 1.2 2011-08-12 15:37:29 copi Exp $");
+  ("$Id$");
 }
 
 /// @cond NODOC

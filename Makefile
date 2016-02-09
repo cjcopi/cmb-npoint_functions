@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.25 2011-08-18 18:11:31 copi Exp $
+# $Id$
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags` -I$(HOME)/opt/myHealpix/include
@@ -101,10 +101,10 @@ clean-all : clean clean-doc
 .PHONY : all clean clean-doc clean-all doc
 
 # Library dependencies.  Set the libraries and include paths.
-$(USE_LIB_HEALPIX) : override LDFLAGS+=$(HEALPIX_LIBS)
+$(USE_LIB_HEALPIX) : override LIBS+=$(HEALPIX_LIBS)
 $(USE_LIB_HEALPIX) : override CPPFLAGS+=$(HEALPIX_INC)
-$(USE_LIB_LZMA) : override LDFLAGS+=-llzma
-$(USE_LIB_Z) : override LDFLAGS+=-lz
+$(USE_LIB_LZMA) : override LIBS+=-llzma
+$(USE_LIB_Z) : override LIBS+=-lz
 $(OPENMP_DEFAULT) : override CPPFLAGS+=$(OPENMP) 
 
 # Individual target dependencies

@@ -10,7 +10,7 @@
 
 namespace {
   const std::string CALCULATE_EQUILATERAL_THREEPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_equilateral_threept_correlation_function.cpp,v 1.5 2011-07-15 16:16:23 copi Exp $");
+  ("$Id$");
 }
 
 

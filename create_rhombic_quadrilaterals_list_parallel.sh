@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# $Id: create_rhombic_quadrilaterals_list_parallel.sh,v 1.1 2011-08-12 02:24:40 copi Exp $
+# $Id$
 
 # This is the companion to the C++ code in
 # create_rhombic_quadrilaterals_list_parallel.cpp

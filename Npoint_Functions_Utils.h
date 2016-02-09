@@ -15,7 +15,7 @@
 namespace {
   /// @cond IDTAG
   const std::string NPOINT_FUNCTIONS_UTILS_RCSID
-  ("$Id: Npoint_Functions_Utils.h,v 1.8 2011-08-13 14:49:16 copi Exp $");
+  ("$Id$");
   /// @endcond
 }
 

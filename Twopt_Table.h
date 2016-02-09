@@ -19,7 +19,7 @@
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id: Twopt_Table.h,v 1.20 2011-08-09 21:06:00 copi Exp $");
+  ("$Id$");
   /// @endcond
 }
 

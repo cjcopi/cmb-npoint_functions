@@ -11,7 +11,7 @@
 
 namespace {
   const std::string CALCULATE_ISOSCELES_THREEPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_isosceles_threept_correlation_function.cpp,v 1.4 2011-07-20 21:08:07 copi Exp $");
+  ("$Id$");
 }
 
 

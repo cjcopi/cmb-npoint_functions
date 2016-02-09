@@ -6,7 +6,7 @@
 namespace {
   /// @cond IDTAG
   const std::string NO_COMPRESSION_WRAPPER_RCSID
-  ("$Id: No_Compression_Wrapper.h,v 1.1 2011-07-17 03:34:19 copi Exp $");
+  ("$Id$");
   /// @endcond
 }
 

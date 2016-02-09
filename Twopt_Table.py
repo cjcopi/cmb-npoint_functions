@@ -4,7 +4,7 @@ import zlib
 import numpy as np
 import healpy
 
-# $Id: Twopt_Table.py,v 1.3 2011-08-09 21:06:37 copi Exp $
+# $Id$
 
 class Twopt_Table (object) :
     """Python class for the storage of a single bin of a two point table.  See

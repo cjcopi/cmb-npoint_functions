@@ -9,7 +9,7 @@
 namespace {
   /// @cond IDTAG
   const std::string ZLIB_WRAPPER_RCSID
-  ("$Id: ZLIB_Wrapper.h,v 1.3 2011-07-17 03:36:30 copi Exp $");
+  ("$Id$");
   /// @endcond
 }
 

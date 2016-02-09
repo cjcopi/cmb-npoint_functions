@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# $Id: create_rhombic_quadrilaterals_list.sh,v 1.1 2011-08-11 16:42:48 copi Exp $
+# $Id$
 
 # This is the companion to the C++ code in
 # create_rhombic_quadrilaterals_list.cpp

@@ -38,7 +38,7 @@
  */
 namespace {
   const std::string CREATE_TWOPT_TABLE_RCSID
-  ("$Id: create_twopt_table.cpp,v 1.11 2011-07-20 18:34:01 copi Exp $");
+  ("$Id$");
 }
 
 void mask_to_pixlist (const Healpix_Map<double>& mask,

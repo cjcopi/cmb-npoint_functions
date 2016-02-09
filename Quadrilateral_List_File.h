@@ -12,7 +12,7 @@
 namespace {
   /// @cond IDTAG
   const std::string QUADRILATERAL_LIST_FILE_RCSID
-  ("$Id: Quadrilateral_List_File.h,v 1.7 2011-08-23 19:50:02 copi Exp $");
+  ("$Id$");
   /// @endcond
 }
 

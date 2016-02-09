@@ -13,7 +13,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_QUADRILATERALS_RCSID
-  ("$Id: Pixel_Quadrilaterals.h,v 1.4 2011-08-11 16:23:48 copi Exp $");
+  ("$Id$");
   /// @endcond
 }
 

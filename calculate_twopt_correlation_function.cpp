@@ -11,7 +11,7 @@
 
 namespace {
   const std::string CALCULATE_TWOPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_twopt_correlation_function.cpp,v 1.7 2011-07-15 16:16:23 copi Exp $");
+  ("$Id$");
 }
 
 

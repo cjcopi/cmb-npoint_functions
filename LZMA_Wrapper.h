@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string LZMA_WRAPPER_RCSID
-  ("$Id: LZMA_Wrapper.h,v 1.3 2011-07-15 16:16:23 copi Exp $");
+  ("$Id$");
   /// @endcond
 }
 

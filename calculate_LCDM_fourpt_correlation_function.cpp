@@ -21,7 +21,7 @@
 
 namespace {
   const std::string CALCULATE_LCDM_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_LCDM_fourpt_correlation_function.cpp,v 1.6 2011-08-17 18:17:15 copi Exp $");
+  ("$Id$");
 }
 
 

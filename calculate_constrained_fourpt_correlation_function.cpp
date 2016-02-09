@@ -16,7 +16,7 @@
 
 namespace {
   const std::string CALCULATE_constrained_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id: calculate_constrained_fourpt_correlation_function.cpp,v 1.1 2011-08-18 18:11:31 copi Exp $");
+  ("$Id$");
 }
 
 
