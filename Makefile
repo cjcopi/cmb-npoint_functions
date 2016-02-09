@@ -1,4 +1,4 @@
-# $Id$
+# $Id: Makefile,v 1.27 2016/02/09 20:31:43 copi Exp $
 
 # HEALPix.  Use the healpix-config I have written to make life easier.
 HEALPIX_INC=`healpix-config --cppflags` -I$(HOME)/opt/myHealpix/include
@@ -33,6 +33,7 @@ USE_COMPRESSION=create_twopt_table \
 	calculate_twopt_correlation_function \
 	calculate_equilateral_threept_correlation_function \
 	calculate_isosceles_threept_correlation_function \
+	calculate_fourpt_correlation_function \
 	test_rhombic_quadrilaterals \
 	create_rhombic_quadrilaterals_list \
 	create_rhombic_quadrilaterals_list_parallel
