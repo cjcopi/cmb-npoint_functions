@@ -15,7 +15,7 @@
 namespace {
   /// @cond IDTAG
   const std::string NPOINT_FUNCTIONS_UTILS_RCSID
-  ("$Id$");
+  ("$Id: Npoint_Functions_Utils.h,v 1.10 2016/02/09 20:31:43 copi Exp $");
   /// @endcond
 }
 
@@ -29,12 +29,12 @@ namespace Npoint_Functions {
    *  character such as an underscore, "prefix_", if desired.
    */
   std::string make_filename (const std::string& prefix, int filenum,
-			      int digits=5,
-			      const std::string& suffix=".dat")
+                              int digits=5,
+                              const std::string& suffix=".dat")
   {
     std::ostringstream sstr;
     sstr << prefix << std::setw(digits) << std::setfill('0') << filenum
-	 << suffix;
+         << suffix;
     return sstr.str();
   }
 
@@ -47,9 +47,9 @@ namespace Npoint_Functions {
    */
   std::vector<std::string>
   get_sequential_file_list (const std::string& prefix,
-			    int start, int increment,
-			    int digits=5,
-			    const std::string& suffix=".dat")
+                            int start, int increment,
+                            int digits=5,
+                            const std::string& suffix=".dat")
   {
     std::vector<std::string> files;
     std::ifstream in;
@@ -71,8 +71,8 @@ namespace Npoint_Functions {
    */
   std::vector<std::string>
   get_sequential_file_list (const std::string& prefix,
-			    int digits=5,
-			    const std::string& suffix=".dat")
+                            int digits=5,
+                            const std::string& suffix=".dat")
   { return get_sequential_file_list (prefix, 0, 1, digits, suffix); }
 
   /** Find numbered files in a range.
@@ -84,9 +84,9 @@ namespace Npoint_Functions {
    */
   std::vector<std::string>
   get_range_file_list (const std::string& prefix,
-		       int start, int end,
-		       int digits=5,
-		       const std::string& suffix=".dat")
+                       int start, int end,
+                       int digits=5,
+                       const std::string& suffix=".dat")
   {
     std::vector<std::string> files;
     std::ifstream in;
@@ -94,8 +94,8 @@ namespace Npoint_Functions {
       std::string fname = make_filename (prefix, Nfile, digits, suffix);
       in.open(fname.c_str());
       if (in) {
-	in.close();
-	files.push_back (fname);
+        in.close();
+        files.push_back (fname);
       }
     }
     return files;
@@ -122,7 +122,7 @@ namespace Npoint_Functions {
    */
   template<typename T>
   void fill_vector_list (const Npoint_Functions::Twopt_Table<T>& t,
-			 std::vector<vec3>& veclist)
+                         std::vector<vec3>& veclist)
   {
     Healpix_Base HBase (t.Nside(), t.Scheme(), SET_NSIDE);
     veclist.resize (t.Npix());
@@ -137,7 +137,7 @@ namespace Npoint_Functions {
    *  \a scheme HEALPix ordering scheme.
    */
   void fill_vector_list (size_t Nside, Healpix_Ordering_Scheme scheme,
-			 std::vector<vec3>& veclist)
+                         std::vector<vec3>& veclist)
   {
     Healpix_Base HBase (Nside, scheme, SET_NSIDE);
     veclist.resize (HBase.Npix());

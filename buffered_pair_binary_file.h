@@ -8,7 +8,7 @@
 namespace {
   /// @cond IDTAG
   const std::string BUFFERED_PAIR_BINARY_FILE_RCSID
-  ("$Id$");
+  ("$Id: buffered_pair_binary_file.h,v 1.5 2016/02/09 20:31:44 copi Exp $");
   /// @endcond
 }
 
@@ -42,9 +42,9 @@ namespace Npoint_Functions {
      *  during the intial construction as it cannot be changed.
      */
     buffered_pair_binary_file (const std::string& filename="",
-			       size_t buf_pairs=1000000)
+                               size_t buf_pairs=1000000)
       : buf_size(2*buf_pairs), fd(new std::fstream), fname(filename), nbuf_write(0),
-	nbuf_read(0), Nbuf(0), Ntotal(0), buf(new T[buf_size])
+        nbuf_read(0), Nbuf(0), Ntotal(0), buf(new T[buf_size])
     {}
     /** Destruct the binary file.
      *  The write buffer is flushed, the file closed, and the buffer freed.
@@ -62,8 +62,8 @@ namespace Npoint_Functions {
     {
       if (fd->is_open()) fd->close();
       fd->open (fname.c_str(),
-		std::fstream::out
-		| std::fstream::trunc | std::fstream::binary);
+                std::fstream::out
+                | std::fstream::trunc | std::fstream::binary);
       nbuf_write = 0;
     }
 
@@ -73,8 +73,8 @@ namespace Npoint_Functions {
     void open_read ()
     {
       if (fd->is_open()) {
-	flush();
-	fd->close();
+        flush();
+        fd->close();
       }
       // Open the file
       fd->open (fname.c_str(), std::fstream::in | std::fstream::binary);
@@ -103,12 +103,12 @@ namespace Npoint_Functions {
     bool read_next_pair (T& i, T& j)
     {
       if (nbuf_read >= Nbuf) {
-	// Read another buffer full
-	Nbuf = Ntotal - fd->tellg()/sizeof(T);
-	if (Nbuf > buf_size) Nbuf = buf_size;
-	else if (Nbuf == 0) return false; // End of file
-	fd->read (reinterpret_cast<char*>(buf.get()), Nbuf*sizeof(T));
-	nbuf_read = 0;
+        // Read another buffer full
+        Nbuf = Ntotal - fd->tellg()/sizeof(T);
+        if (Nbuf > buf_size) Nbuf = buf_size;
+        else if (Nbuf == 0) return false; // End of file
+        fd->read (reinterpret_cast<char*>(buf.get()), Nbuf*sizeof(T));
+        nbuf_read = 0;
       }
       i = buf.get()[nbuf_read++];
       j = buf.get()[nbuf_read++];
@@ -123,11 +123,11 @@ namespace Npoint_Functions {
     void flush()
     {
       if (nbuf_write > buf_size) {
-	std::cerr << "Write buffer too big : " << nbuf_write << std::endl;
-	nbuf_write = buf_size;
+        std::cerr << "Write buffer too big : " << nbuf_write << std::endl;
+        nbuf_write = buf_size;
       }
       if (nbuf_write > 0) {
-	fd->write (reinterpret_cast<char*>(buf.get()), nbuf_write*sizeof(T));
+        fd->write (reinterpret_cast<char*>(buf.get()), nbuf_write*sizeof(T));
       }
       nbuf_write = 0;
     }
@@ -138,8 +138,8 @@ namespace Npoint_Functions {
     void close()
     {
       if (fd->is_open()) {
-	flush();
-	fd->close();
+        flush();
+        fd->close();
       }
     }
 

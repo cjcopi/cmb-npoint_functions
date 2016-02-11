@@ -38,11 +38,11 @@
  */
 namespace {
   const std::string CREATE_TWOPT_TABLE_RCSID
-  ("$Id$");
+  ("$Id: create_twopt_table.cpp,v 1.13 2016/02/09 20:31:44 copi Exp $");
 }
 
 void mask_to_pixlist (const Healpix_Map<double>& mask,
-		      std::vector<int>& pixlist)
+                      std::vector<int>& pixlist)
 {
   pixlist.clear();
   for (int j=0; j < mask.Npix(); ++j) {
@@ -51,7 +51,7 @@ void mask_to_pixlist (const Healpix_Map<double>& mask,
 }
 
 bool read_text_file (const std::string& cosbinfile,
-		     std::vector<double>& bin_list)
+                     std::vector<double>& bin_list)
 {
   /* Read the file line by line and extract the first column.
    *  Anything following a # is a comment.
@@ -119,7 +119,7 @@ int main (int argc, char *argv[])
   } else {
     pixel_list.resize (12*Nside*Nside);
     std::generate (pixel_list.begin(), pixel_list.end(),
-		   Npoint_Functions::myRange<int>());
+                   Npoint_Functions::myRange<int>());
   }
 
   std::vector<double> cosbin;
@@ -132,16 +132,16 @@ int main (int argc, char *argv[])
     int Nbin = 2/dcosbin;
     bin_list.resize(Nbin);
     std::generate (bin_list.begin(), bin_list.end(),
-		   Npoint_Functions::myRange<double>(-1.0+dcosbin/2,
-						     dcosbin));
+                   Npoint_Functions::myRange<double>(-1.0+dcosbin/2,
+                                                     dcosbin));
   } else {
     int Nbin = 180/dtheta;
     bin_list.resize(Nbin);
     /* Run this "backward" since we will use bins in cos(theta) and
      * cos(180)=-1. */
     std::generate (bin_list.begin(), bin_list.end(),
-		   Npoint_Functions::myRange<double>(180-dtheta/2,
-						     -dtheta));
+                   Npoint_Functions::myRange<double>(180-dtheta/2,
+                                                     -dtheta));
     /* We want equal spacing/width in theta (I guess) so
      * create cosbin here with this in mind. */
     cosbin.push_back(-1.1);
@@ -165,9 +165,9 @@ int main (int argc, char *argv[])
 
   size_t Npix = pixel_list.size();
   std::cout << "Generating for\n Nside = " << Nside
-	    << "\n Npix = " << Npix
-	    << "\n Nbin = " << bin_list.size()
-	    << std::endl;
+            << "\n Npix = " << Npix
+            << "\n Nbin = " << bin_list.size()
+            << std::endl;
 
   Healpix_Base HBase (Nside, NEST, SET_NSIDE);
   // Create list of vectors.
@@ -179,8 +179,8 @@ int main (int argc, char *argv[])
   std::vector<Npoint_Functions::buffered_pair_binary_file<int> > binfiles;
   for (size_t k=0; k < bin_list.size(); ++k) {
     binfiles.push_back(Npoint_Functions::buffered_pair_binary_file<int>
-		       (Npoint_Functions::make_filename
-			(tmpfile_prefix, k))); 
+                       (Npoint_Functions::make_filename
+                        (tmpfile_prefix, k))); 
     binfiles[k].create();
   }
   
@@ -212,7 +212,7 @@ int main (int argc, char *argv[])
        * smaller) and end at 1 (or larger).
        */
       while ((dp < cosbin[ibin]) || (dp > cosbin[ibin+1]))
-	ibin += dir;
+        ibin += dir;
       binfiles[ibin].append(i, j);
     }
   }
@@ -236,18 +236,18 @@ int main (int argc, char *argv[])
       twopt_table.reset();
       twopt_table.bin_value (bin_list[k]);
       Npoint_Functions::buffered_pair_binary_file<int>
-	binfile(Npoint_Functions::make_filename (tmpfile_prefix, k));
+        binfile(Npoint_Functions::make_filename (tmpfile_prefix, k));
 
       // Next open the file for reading
       binfile.open_read();
       // Now fill in the table by looping over all pairs of pixels.
       while (binfile.read_next_pair (i, j)) {
-	twopt_table.add_pair (i, j);
+        twopt_table.add_pair (i, j);
       }
       if (clean_tmpfiles) unlink(binfile.filename().c_str());
 
       twopt_table.write_file 
-	(Npoint_Functions::make_filename (twoptfile_prefix, k));
+        (Npoint_Functions::make_filename (twoptfile_prefix, k));
 
     }
   }

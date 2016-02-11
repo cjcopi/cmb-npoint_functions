@@ -14,7 +14,7 @@
 
 namespace {
   const std::string CALCULATE_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id$");
+  ("$Id: calculate_fourpt_correlation_function.cpp,v 1.5 2016/02/09 20:31:44 copi Exp $");
 }
 
 
@@ -56,41 +56,41 @@ int main (int argc, char *argv[])
     for (size_t k=0; k < quad_list_files.size(); ++k) {
 
       if (! qlf.initialize (quad_list_files[k])) {
-	std::cerr << "Error initializing quadrilateral list from "
-		  << quad_list_files[k] << std::endl;
-	std::exit(1);
+        std::cerr << "Error initializing quadrilateral list from "
+                  << quad_list_files[k] << std::endl;
+        std::exit(1);
       }
       if (static_cast<size_t>(map.Nside()) != qlf.Nside()) {
-	std::cerr << "Map has Nside = " << map.Nside()
-		  << " but quad list has Nside = " << qlf.Nside()
-		  << "\nGiving up!\n";
-	std::exit(1);
+        std::cerr << "Map has Nside = " << map.Nside()
+                  << " but quad list has Nside = " << qlf.Nside()
+                  << "\nGiving up!\n";
+        std::exit(1);
       }
       if (map.Scheme() != qlf.Scheme()) map.swap_scheme();
       if (have_mask) {
-	if (static_cast<size_t>(mask.Nside()) != qlf.Nside()) {
-	  std::cerr << "Mask and quadrilateral lists do not have"
-		    << " the same Nside: " << mask.Nside() 
-		    << " != " << qlf.Nside() << std::endl;
-	  std::exit(1);
-	}
-	if (mask.Scheme() != qlf.Scheme()) mask.swap_scheme();
+        if (static_cast<size_t>(mask.Nside()) != qlf.Nside()) {
+          std::cerr << "Mask and quadrilateral lists do not have"
+                    << " the same Nside: " << mask.Nside() 
+                    << " != " << qlf.Nside() << std::endl;
+          std::exit(1);
+        }
+        if (mask.Scheme() != qlf.Scheme()) mask.swap_scheme();
       }
 
 #pragma omp critical
       {
-	std::cerr 
+        std::cerr 
 #ifdef OMP
-	  << omp_get_thread_num() << " "
+          << omp_get_thread_num() << " "
 #endif       
-	  << k << std::endl;
+          << k << std::endl;
       }
 
       bin_list[k] = qlf.bin_value();
       if (have_mask) {
-	Corr[k] = calculate_masked_fourpoint_function (map, mask, qlf);
+        Corr[k] = calculate_masked_fourpoint_function (map, mask, qlf);
       } else {
-	Corr[k] = calculate_fourpoint_function (map, qlf);
+        Corr[k] = calculate_fourpoint_function (map, qlf);
       }
     }
   }
@@ -98,8 +98,8 @@ int main (int argc, char *argv[])
   for (size_t k=0; k < bin_list.size(); ++k) {
     // Same format as spice
     std::cout << bin_list[k]*M_PI/180 << " " 
-	      << cos(bin_list[k]*M_PI/180) << " "
-	      << Corr[k] << std::endl;
+              << cos(bin_list[k]*M_PI/180) << " "
+              << Corr[k] << std::endl;
   }
 
   return 0;

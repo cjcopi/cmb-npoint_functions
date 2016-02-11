@@ -6,7 +6,7 @@
 namespace {
   /// @cond IDTAG
   const std::string NO_COMPRESSION_WRAPPER_RCSID
-  ("$Id$");
+  ("$Id: No_Compression_Wrapper.h,v 1.3 2016/02/09 20:31:43 copi Exp $");
   /// @endcond
 }
 
@@ -26,7 +26,7 @@ namespace Npoint_Functions {
      *  the output stream, \a out, at the current location in the file.
      */
     bool write_buffer (std::ofstream& out,
-		       void *buf_in, size_t Nbytes)
+                       void *buf_in, size_t Nbytes)
     {
       out.write (reinterpret_cast<char*>(buf_in), Nbytes);
       return (! out.fail());
@@ -39,7 +39,7 @@ namespace Npoint_Functions {
      *  \b assumed that the stream contains at least \a Nbytes of data.
      */
     bool read_buffer (std::ifstream& in,
-		      void *buf_out, size_t Nbytes)
+                      void *buf_out, size_t Nbytes)
     {
       in.read (reinterpret_cast<char*>(buf_out), Nbytes);
       return (! in.fail());

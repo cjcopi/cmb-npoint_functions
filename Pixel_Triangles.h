@@ -12,7 +12,7 @@
 namespace {
   /// @cond IDTAG
   const std::string PIXEL_TRIANGLES_RCSID
-  ("$Id$");
+  ("$Id: Pixel_Triangles.h,v 1.25 2016/02/09 20:31:43 copi Exp $");
   /// @endcond
 }
 
@@ -20,23 +20,23 @@ namespace {
     /** Find matches in two lists and append them to a new list. */
   template<class IteratorType, typename T>
   void append_matches (IteratorType it1, IteratorType it1end,
-		       IteratorType it2, IteratorType it2end,
-		       std::vector<T>& res)
+                       IteratorType it2, IteratorType it2end,
+                       std::vector<T>& res)
   {
     /* Loop over the iterators storing matches.
      * Since the lists are monotonically increasing and -1 padded at the end
      * a simple linear search is an efficient algorithm.
      */
     while ( (it1 != it1end) && (it2 != it2end)
-	    && (*it1 != -1) && (*it2 != -1) ) {
+            && (*it1 != -1) && (*it2 != -1) ) {
       if (*it1 == *it2) {
-	res.push_back (*it1);
-	++it1;
-	++it2;
+        res.push_back (*it1);
+        ++it1;
+        ++it2;
       } else if (*it1 < *it2) {
-	++it1;
+        ++it1;
       } else {
-	++it2;
+        ++it2;
       }
     }
   }
@@ -46,9 +46,9 @@ namespace {
    *  list will be greater than or equal to this value. */
   template<class IteratorType, typename T>
   void append_matches (T minval,
-		       IteratorType it1, IteratorType it1end,
-		       IteratorType it2, IteratorType it2end,
-		       std::vector<T>& res)
+                       IteratorType it1, IteratorType it1end,
+                       IteratorType it2, IteratorType it2end,
+                       std::vector<T>& res)
   {
     while ((it1 != it1end) && (*it1 < minval)) ++it1;
     while ((it2 != it2end) && (*it2 < minval)) ++it2;
@@ -70,7 +70,7 @@ namespace Npoint_Functions {
      *  \relates Pixel_Triangles
      */
     Orientation calculate_orientation (const vec3& n1, const vec3& n2,
-				       const vec3& n3)
+                                       const vec3& n3)
     {
       double val = dotprod (crossprod (n1, n2), n3);
       return ((val > 0) ? RIGHTHANDED : LEFTHANDED);
@@ -107,7 +107,7 @@ namespace Npoint_Functions {
       triangles[n][1] = p2;
       triangles[n][2] = p3;
       orient.push_back (calculate_orientation (v[p1], v[p2],
-					       v[p3]));
+                                               v[p3]));
     }
 
     /// Set the edge lengths of the triangle
@@ -124,8 +124,8 @@ namespace Npoint_Functions {
      *  centers is also calculated.
      */
     void initialize (const Twopt_Table<T>& t1,
-		     const Twopt_Table<T>& t2,
-		     const Twopt_Table<T>& t3)
+                     const Twopt_Table<T>& t2,
+                     const Twopt_Table<T>& t3)
     {
       this->reset();
       set_edge_lengths (t1.bin_value(), t2.bin_value(), t3.bin_value());
@@ -137,7 +137,7 @@ namespace Npoint_Functions {
   public :
     /// Generic constructor.
     Pixel_Triangles () : triangles(), edge_length(3), orient(), v(),
-			 nside(0), scheme(NEST) {}
+                         nside(0), scheme(NEST) {}
 
     /** Reset the list of triangles.
      *  All triangles are erased.
@@ -157,8 +157,8 @@ namespace Npoint_Functions {
      *  as separate triangles.
      */
     void find_triangles (const Twopt_Table<T>& t1,
-			 const Twopt_Table<T>& t2,
-			 const Twopt_Table<T>& t3)
+                         const Twopt_Table<T>& t2,
+                         const Twopt_Table<T>& t3)
     {
       T p1, p2;
       T i2;
@@ -167,19 +167,19 @@ namespace Npoint_Functions {
       this->initialize (t1, t2, t3);
 
       for (size_t i1=0; i1 < t1.Npix(); ++i1) {
-	p1 = t1.pixel_list(i1);
-	for (size_t j2=0; (j2 < t1.Nmax()) && (t1(i1,j2) != -1); ++j2) {
-	  i2 = t1(i1,j2);
-	  p2 = t1.pixel_list(i2);
-	  // Finally can search for and add appropriate pairs.
-	  trip.clear();
-	  append_matches (&t2(i1,0), &t2(i1,t2.Nmax()),
-			  &t3(i2,0), &t3(i2,t3.Nmax()), trip);
-	  // Now put all the triplets in the list.
-	  for (size_t k=0; k < trip.size(); ++k) {
-	    this->add (p1, p2, t1.pixel_list(trip[k]));
-	  }
-	}
+        p1 = t1.pixel_list(i1);
+        for (size_t j2=0; (j2 < t1.Nmax()) && (t1(i1,j2) != -1); ++j2) {
+          i2 = t1(i1,j2);
+          p2 = t1.pixel_list(i2);
+          // Finally can search for and add appropriate pairs.
+          trip.clear();
+          append_matches (&t2(i1,0), &t2(i1,t2.Nmax()),
+                          &t3(i2,0), &t3(i2,t3.Nmax()), trip);
+          // Now put all the triplets in the list.
+          for (size_t k=0; k < trip.size(); ++k) {
+            this->add (p1, p2, t1.pixel_list(trip[k]));
+          }
+        }
       }
     }
 
@@ -246,7 +246,7 @@ namespace Npoint_Functions {
      *  order is set by ensuring that the triangle is righthanded.
      */
     void find_triangles (const Twopt_Table<T>& tequal,
-			 const Twopt_Table<T>& tother)
+                         const Twopt_Table<T>& tother)
     {
       T p1, p2;
       T i2;
@@ -255,21 +255,21 @@ namespace Npoint_Functions {
       this->initialize (tother, tequal, tequal);
 
       for (size_t i1=0; i1 < tother.Npix(); ++i1) {
-	p1 = tother.pixel_list(i1);
-	for (size_t j2=0; (j2 < tother.Nmax()) && (tother(i1,j2) != -1);
-	     ++j2) {
-	  i2 = tother(i1,j2);
-	  p2 = tother.pixel_list(i2);
-	  if (p2 < p1) continue; // Don't double count triangles.
-	  // Finally can search for and add appropriate pairs.
-	  trip.clear();
-	  append_matches (&tequal(i1,0), &tequal(i1,tequal.Nmax()),
-			  &tequal(i2,0), &tequal(i2,tequal.Nmax()), trip);
-	  // Now put all the triplets in the list.
-	  for (size_t k=0; k < trip.size(); ++k) {
-	    this->add (p1, p2, tequal.pixel_list(trip[k]));
-	  }
-	}
+        p1 = tother.pixel_list(i1);
+        for (size_t j2=0; (j2 < tother.Nmax()) && (tother(i1,j2) != -1);
+             ++j2) {
+          i2 = tother(i1,j2);
+          p2 = tother.pixel_list(i2);
+          if (p2 < p1) continue; // Don't double count triangles.
+          // Finally can search for and add appropriate pairs.
+          trip.clear();
+          append_matches (&tequal(i1,0), &tequal(i1,tequal.Nmax()),
+                          &tequal(i2,0), &tequal(i2,tequal.Nmax()), trip);
+          // Now put all the triplets in the list.
+          for (size_t k=0; k < trip.size(); ++k) {
+            this->add (p1, p2, tequal.pixel_list(trip[k]));
+          }
+        }
       }
     }
   };
@@ -301,20 +301,20 @@ namespace Npoint_Functions {
       this->initialize(t, t, t);
 
       for (size_t i1=0; i1 < t.Npix(); ++i1) {
-	p1 = t.pixel_list(i1);
-	for (size_t j2=0; (j2 < t.Nmax()) && (t(i1,j2) != -1); ++j2) {
-	  i2 = t(i1,j2);
-	  p2 = t.pixel_list(i2);
-	  if (p2 < p1) continue;
-	  // Finally can search for and add appropriate pairs.
-	  trip.clear();
-	  append_matches (i2, &t(i1,0), &t(i1,t.Nmax()),
-			  &t(i2,0), &t(i2,t.Nmax()), trip);
-	  // Now put all the triplets in the list.
-	  for (size_t k=0; k < trip.size(); ++k) {
-	    this->add (p1, p2, t.pixel_list(trip[k]));
-	  }
-	}
+        p1 = t.pixel_list(i1);
+        for (size_t j2=0; (j2 < t.Nmax()) && (t(i1,j2) != -1); ++j2) {
+          i2 = t(i1,j2);
+          p2 = t.pixel_list(i2);
+          if (p2 < p1) continue;
+          // Finally can search for and add appropriate pairs.
+          trip.clear();
+          append_matches (i2, &t(i1,0), &t(i1,t.Nmax()),
+                          &t(i2,0), &t(i2,t.Nmax()), trip);
+          // Now put all the triplets in the list.
+          for (size_t k=0; k < trip.size(); ++k) {
+            this->add (p1, p2, t.pixel_list(trip[k]));
+          }
+        }
       }
     }
   };

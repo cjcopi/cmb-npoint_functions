@@ -8,7 +8,7 @@
 
 namespace {
   const std::string CREATE_RHOMBIC_QUADRILATERALS_LIST_RCSID
-  ("$Id$");
+  ("$Id: create_rhombic_quadrilaterals_list.cpp,v 1.3 2016/02/09 20:31:44 copi Exp $");
 }
 
 void usage (const char *progname)
@@ -24,7 +24,7 @@ int main (int argc, char *argv[])
   std::string twopt_table_file = argv[1];
 
   Npoint_Functions::Twopt_Table<int> twopt_table;
-  twopt_table.read_file (twopt_table_file);					
+  twopt_table.read_file (twopt_table_file);                                        
   Npoint_Functions::Pixel_Triangles_Equilateral<int> triangles;
   std::vector<int> tri;
   std::vector<int> thirdpt;
@@ -35,7 +35,7 @@ int main (int argc, char *argv[])
   while (q.next(tri, thirdpt)) {
     for (size_t j=0; j < thirdpt.size(); ++j) {
       for (size_t i=0; i < tri.size(); ++i)
-	std::cout << tri[i] << " ";
+        std::cout << tri[i] << " ";
       std::cout << thirdpt[j] << std::endl;
     }
   }

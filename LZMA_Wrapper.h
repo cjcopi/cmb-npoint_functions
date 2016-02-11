@@ -10,7 +10,7 @@
 namespace {
   /// @cond IDTAG
   const std::string LZMA_WRAPPER_RCSID
-  ("$Id$");
+  ("$Id: LZMA_Wrapper.h,v 1.5 2016/02/09 20:31:43 copi Exp $");
   /// @endcond
 }
 
@@ -39,7 +39,7 @@ namespace Npoint_Functions {
      *  file. 
      */
     bool write_buffer (std::ofstream& out,
-		       const void *buf_in, size_t Nbytes)
+                       const void *buf_in, size_t Nbytes)
     {
       /* Create the compression buffer.  We know the data CAN be compressed
        * so we set this to be the same size as the full buffer.  This is
@@ -52,9 +52,9 @@ namespace Npoint_Functions {
       // Initialize the buffer
       ret = lzma_easy_encoder (&strm, compression_level, LZMA_CHECK_CRC64);
       if (ret != LZMA_OK) {
-	std::cerr << "Error initializing compression buffer : "
-		  << ret << std::endl;
-	return false;
+        std::cerr << "Error initializing compression buffer : "
+                  << ret << std::endl;
+        return false;
       }
 
       strm.next_in  = reinterpret_cast<const uint8_t*>(buf_in);
@@ -64,15 +64,15 @@ namespace Npoint_Functions {
 
       ret = lzma_code (&strm, LZMA_RUN);
       if (ret != LZMA_OK) {
-	std::cerr << "Error compressing buffer : " << ret << std::endl;
-	return false;
+        std::cerr << "Error compressing buffer : " << ret << std::endl;
+        return false;
       }
 
       ret = lzma_code (&strm, LZMA_FINISH);
       if ((ret != LZMA_OK) && (ret != LZMA_STREAM_END)) {
-	std::cerr << "Error cleaning up compression buffer : "
-		  << ret << std::endl;
-	return false;
+        std::cerr << "Error cleaning up compression buffer : "
+                  << ret << std::endl;
+        return false;
       }
       out.write (reinterpret_cast<char*>(buf_comp.get()), strm.total_out);
       lzma_end (&strm);
@@ -86,7 +86,7 @@ namespace Npoint_Functions {
      *  in \a buf_out.
      */
     bool read_buffer (std::ifstream& in,
-		      void *buf_out, size_t Nbytes)
+                      void *buf_out, size_t Nbytes)
     {
       // First read in compressed values from the file.
       std::streampos curpos = in.tellg();
@@ -101,9 +101,9 @@ namespace Npoint_Functions {
       lzma_ret ret;
       ret = lzma_stream_decoder (&strm, UINT64_MAX, 0);
       if (ret != LZMA_OK) {
-	std::cerr << "Error initializing decompression : "
-		  << ret << std::endl;
-	return false;
+        std::cerr << "Error initializing decompression : "
+                  << ret << std::endl;
+        return false;
       }
       strm.next_in = buf_comp.get();
       strm.avail_in = in_len;
@@ -112,14 +112,14 @@ namespace Npoint_Functions {
 
       ret = lzma_code (&strm, LZMA_RUN);
       if ((ret != LZMA_OK) && (ret != LZMA_STREAM_END)) {
-	std::cerr << "Error decompressing buffer : " << ret << std::endl;
-	return false;
+        std::cerr << "Error decompressing buffer : " << ret << std::endl;
+        return false;
       }
       ret = lzma_code (&strm, LZMA_FINISH);
       if ((ret != LZMA_OK) && (ret != LZMA_STREAM_END)) {
-	std::cerr << "Error cleaning up decompression buffer : "
-		  << ret << std::endl;
-	return false;
+        std::cerr << "Error cleaning up decompression buffer : "
+                  << ret << std::endl;
+        return false;
       }
       lzma_end (&strm);
       return (! in.fail());

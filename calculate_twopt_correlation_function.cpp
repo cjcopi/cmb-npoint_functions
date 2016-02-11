@@ -11,7 +11,7 @@
 
 namespace {
   const std::string CALCULATE_TWOPT_CORRELATION_FUNCTION_RCSID
-  ("$Id$");
+  ("$Id: calculate_twopt_correlation_function.cpp,v 1.9 2016/02/09 20:31:44 copi Exp $");
 }
 
 
@@ -52,18 +52,18 @@ int main (int argc, char *argv[])
       C2 = 0;
       Npair = 0;
       for (size_t i=0; i < twopt_table.Npix(); ++i) {
-	Csum = 0;
-	p1 = twopt_table.pixel_list()[i];
-	for (size_t j=0;
-	     ((j < twopt_table.Nmax())
-	      && (twopt_table(i,j) != -1));
-	     ++j) {
-	  p2 = twopt_table.pixel_list()[twopt_table(i,j)];
-	  if (p1 > p2) continue; // Avoid double counting.
-	  ++Npair;
-	  Csum += map[p2];
-	}
-	C2 += map[p1] * Csum;
+        Csum = 0;
+        p1 = twopt_table.pixel_list()[i];
+        for (size_t j=0;
+             ((j < twopt_table.Nmax())
+              && (twopt_table(i,j) != -1));
+             ++j) {
+          p2 = twopt_table.pixel_list()[twopt_table(i,j)];
+          if (p1 > p2) continue; // Avoid double counting.
+          ++Npair;
+          Csum += map[p2];
+        }
+        C2 += map[p1] * Csum;
       }
       C2 /= Npair;
       bin_list[k] = twopt_table.bin_value();
@@ -74,7 +74,7 @@ int main (int argc, char *argv[])
   for (size_t k=0; k < twopt_table_file.size(); ++k) {
     // Same format as spice
     std::cout << std::acos(bin_list[k]) << " " << bin_list[k] << " "
-	      << Corr[k] << std::endl;
+              << Corr[k] << std::endl;
   }
 
   return 0;

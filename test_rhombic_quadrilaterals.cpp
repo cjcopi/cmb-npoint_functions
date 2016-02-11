@@ -7,7 +7,7 @@
 #include <Pixel_Quadrilaterals.h>
 #include <Npoint_Functions_Utils.h>
 
-// $Id$
+// $Id: test_rhombic_quadrilaterals.cpp,v 1.3 2016/02/09 20:31:45 copi Exp $
 
 int main ()
 {
@@ -15,7 +15,7 @@ int main ()
 
   Npoint_Functions::Twopt_Table<int> twopt_table;
   twopt_table.read_file (Npoint_Functions::make_filename (twopt_prefix,
-							  150)); 
+                                                          150)); 
   Npoint_Functions::Pixel_Triangles_Equilateral<int> triangles;
   std::vector<int> tri;
   std::vector<int> thirdpt;
@@ -26,7 +26,7 @@ int main ()
   while (q.next(tri, thirdpt)) {
     for (size_t j=0; j < thirdpt.size(); ++j) {
       for (size_t i=0; i < tri.size(); ++i)
-	std::cout << tri[i] << " ";
+        std::cout << tri[i] << " ";
       std::cout << thirdpt[j] << std::endl;
     }
   }

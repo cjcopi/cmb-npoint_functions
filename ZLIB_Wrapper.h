@@ -9,7 +9,7 @@
 namespace {
   /// @cond IDTAG
   const std::string ZLIB_WRAPPER_RCSID
-  ("$Id$");
+  ("$Id: ZLIB_Wrapper.h,v 1.5 2016/02/09 20:31:44 copi Exp $");
   /// @endcond
 }
 
@@ -34,7 +34,7 @@ namespace Npoint_Functions {
      *  file. 
      */
     bool write_buffer (std::ofstream& out,
-		       void *buf_in, size_t Nbytes)
+                       void *buf_in, size_t Nbytes)
     {
       if (Nbytes == 0) return true;
 
@@ -52,9 +52,9 @@ namespace Npoint_Functions {
       strm.opaque = Z_NULL;
       ret = deflateInit (&strm, compression_level);
       if (ret != Z_OK) {
-	std::cerr << "Error initializing compression buffer : "
-		  << ret << std::endl;
-	return false;
+        std::cerr << "Error initializing compression buffer : "
+                  << ret << std::endl;
+        return false;
       }
 
       strm.next_in  = reinterpret_cast<unsigned char*>(buf_in);
@@ -64,20 +64,20 @@ namespace Npoint_Functions {
 
       ret = deflate (&strm, Z_NO_FLUSH);
       if ((ret != Z_OK) && (ret != Z_STREAM_END)) {
-	std::cerr << "Error compressing buffer : " << ret << std::endl;
-	deflateEnd (&strm);
-	return false;
+        std::cerr << "Error compressing buffer : " << ret << std::endl;
+        deflateEnd (&strm);
+        return false;
       }
 
       ret = deflate (&strm, Z_FINISH);
       if (ret != Z_STREAM_END) {
-	std::cerr << "Error cleaning up compression buffer : "
-		  << ret << std::endl;
-	deflateEnd (&strm);
-	return false;
+        std::cerr << "Error cleaning up compression buffer : "
+                  << ret << std::endl;
+        deflateEnd (&strm);
+        return false;
       }
       out.write (reinterpret_cast<char*>(buf_comp.get()),
-		 Nbytes - strm.avail_out);
+                 Nbytes - strm.avail_out);
       deflateEnd (&strm);
       return (! out.fail());
     }
@@ -89,7 +89,7 @@ namespace Npoint_Functions {
      *  in \a buf_out.
      */
     bool read_buffer (std::ifstream& in,
-		      void *buf_out, size_t Nbytes)
+                      void *buf_out, size_t Nbytes)
     {
       // First read in compressed values from the file.
       std::streampos curpos = in.tellg();
@@ -110,9 +110,9 @@ namespace Npoint_Functions {
       strm.next_in = Z_NULL;
       ret = inflateInit(&strm);
       if (ret != Z_OK) {
-	std::cerr << "Error initializing decompression : "
-		  << ret << std::endl;
-	return false;
+        std::cerr << "Error initializing decompression : "
+                  << ret << std::endl;
+        return false;
       }
       strm.next_in = buf_comp.get();
       strm.avail_in = in_len;
@@ -121,9 +121,9 @@ namespace Npoint_Functions {
 
       ret = inflate (&strm, Z_NO_FLUSH);
       if (ret != Z_STREAM_END) {
-	std::cerr << "Error decompressing buffer : " << ret << std::endl;
-	inflateEnd (&strm);
-	return false;
+        std::cerr << "Error decompressing buffer : " << ret << std::endl;
+        inflateEnd (&strm);
+        return false;
       }
       inflateEnd (&strm);
       return (! in.fail());

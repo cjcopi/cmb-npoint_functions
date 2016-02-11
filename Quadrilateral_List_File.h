@@ -12,7 +12,7 @@
 namespace {
   /// @cond IDTAG
   const std::string QUADRILATERAL_LIST_FILE_RCSID
-  ("$Id$");
+  ("$Id: Quadrilateral_List_File.h,v 1.9 2016/02/09 20:31:44 copi Exp $");
   /// @endcond
 }
 
@@ -36,7 +36,7 @@ namespace Npoint_Functions {
      *  use. */
     Quadrilateral_List_File (const std::string& filename="")
       : nside(0), scheme(NEST), binval(0.0),
-	fd(new std::ifstream), buf(0)
+        fd(new std::ifstream), buf(0)
     { if (filename != "") initialize (filename); }
 
     /** Destructor.
@@ -56,8 +56,8 @@ namespace Npoint_Functions {
       if (fd->is_open()) fd->close();
       fd->open (filename.c_str(), std::fstream::in | std::fstream::binary);
       if (! *fd) {
-	std::cerr << "Failed to open file " << filename << std::endl;
-	return false;
+        std::cerr << "Failed to open file " << filename << std::endl;
+        return false;
       }
       
       // Read header.
@@ -65,8 +65,8 @@ namespace Npoint_Functions {
       size_t maxbytes;
       fd->read (&version, sizeof(version));
       if (version != 1) {
-	std::cerr << "Only version 1 supported\n";
-	return false;
+        std::cerr << "Only version 1 supported\n";
+        return false;
       }
       fd->read (reinterpret_cast<char*>(&nside), sizeof(nside));
       fd->read (&s, sizeof(s));
@@ -125,7 +125,7 @@ namespace Npoint_Functions {
    */
   template<typename TM, typename TL>
   TM calculate_fourpoint_function (const Healpix_Map<TM>& map,
-				   Quadrilateral_List_File<TL>& qlf)
+                                   Quadrilateral_List_File<TL>& qlf)
   {
     size_t ind;
     TL p[4];
@@ -141,20 +141,20 @@ namespace Npoint_Functions {
       N[1] = arr[ind++];
       C[1] = 0.0;
       for (int n1=0; n1 < N[1]; ++n1) {
-	p[1] = arr[ind++];
-	N[2] = arr[ind++];
-	C[2] = 0.0;
-	for (int n2=0; n2 < N[2]; ++n2) {
-	  p[2] = arr[ind++];
-	  N[3] = arr[ind++];
-	  Nquad += N[3];
-	  C[3] = 0.0;
-	  for (int n3=0; n3 < N[3]; ++n3) {
-	    C[3] += map[arr[ind++]];
-	  }
-	  C[2] += map[p[2]] * C[3];
-	}
-	C[1] += map[p[1]] * C[2];
+        p[1] = arr[ind++];
+        N[2] = arr[ind++];
+        C[2] = 0.0;
+        for (int n2=0; n2 < N[2]; ++n2) {
+          p[2] = arr[ind++];
+          N[3] = arr[ind++];
+          Nquad += N[3];
+          C[3] = 0.0;
+          for (int n3=0; n3 < N[3]; ++n3) {
+            C[3] += map[arr[ind++]];
+          }
+          C[2] += map[p[2]] * C[3];
+        }
+        C[1] += map[p[1]] * C[2];
       }
       C[0] += map[p[0]] * C[1];
     }
@@ -198,31 +198,31 @@ namespace Npoint_Functions {
       N[1] = arr[ind++];
       std::fill (C1.begin(), C1.end(), 0.0);
       for (int n1=0; n1 < N[1]; ++n1) {
-	p[1] = arr[ind++];
-	N[2] = arr[ind++];
-	std::fill (C2.begin(), C2.end(), 0.0);
-	for (int n2=0; n2 < N[2]; ++n2) {
-	  p[2] = arr[ind++];
-	  N[3] = arr[ind++];
-	  Nquad += N[3];
-	  std::fill (C3.begin(), C3.end(), 0.0);
-	  for (int n3=0; n3 < N[3]; ++n3) {
-	    for (size_t j=0; j < C3.size(); ++j)
-	      C3[j] += maps[j][arr[ind]];
-	    ++ind;
-	  }
-	  for (size_t j=0; j < C2.size(); ++j)
-	    C2[j] += maps[j][p[2]] * C3[j];
-	}
-	for (size_t j=0; j < C2.size(); ++j)
-	  C1[j] += maps[j][p[1]] * C2[j];
+        p[1] = arr[ind++];
+        N[2] = arr[ind++];
+        std::fill (C2.begin(), C2.end(), 0.0);
+        for (int n2=0; n2 < N[2]; ++n2) {
+          p[2] = arr[ind++];
+          N[3] = arr[ind++];
+          Nquad += N[3];
+          std::fill (C3.begin(), C3.end(), 0.0);
+          for (int n3=0; n3 < N[3]; ++n3) {
+            for (size_t j=0; j < C3.size(); ++j)
+              C3[j] += maps[j][arr[ind]];
+            ++ind;
+          }
+          for (size_t j=0; j < C2.size(); ++j)
+            C2[j] += maps[j][p[2]] * C3[j];
+        }
+        for (size_t j=0; j < C2.size(); ++j)
+          C1[j] += maps[j][p[1]] * C2[j];
       }
       for (size_t j=0; j < C4.size(); ++j)
-	C4[j] += maps[j][p[0]] * C1[j];
+        C4[j] += maps[j][p[0]] * C1[j];
     }
     if (Nquad > 0) {
       for (size_t j=0; j < C4.size(); ++j)
-	C4[j] /= Nquad;
+        C4[j] /= Nquad;
     }
   }
 
@@ -237,8 +237,8 @@ namespace Npoint_Functions {
    */
   template<typename TM, typename TL>
   TM calculate_masked_fourpoint_function (const Healpix_Map<TM>& map,
-					  const Healpix_Map<TM>& mask,
-					  Quadrilateral_List_File<TL>& qlf)
+                                          const Healpix_Map<TM>& mask,
+                                          Quadrilateral_List_File<TL>& qlf)
   {
     size_t ind;
     TL p[4];
@@ -255,27 +255,27 @@ namespace Npoint_Functions {
       N[1] = arr[ind++];
       C[1] = 0.0;
       for (int n1=0; n1 < N[1]; ++n1) {
-	p[1] = arr[ind++];
-	N[2] = arr[ind++];
-	C[2] = 0.0;
-	for (int n2=0; n2 < N[2]; ++n2) {
-	  p[2] = arr[ind++];
-	  N[3] = arr[ind++];
-	  if ((mask[p[1]] == 0) || (mask[p[2]] == 0)) {
-	    // Short circuit.  We know we can skip ahead.
-	    ind += N[3];
-	    continue;
-	  }
-	  C[3] = 0.0;
-	  for (int n3=0; n3 < N[3]; ++n3) {
-	    if (mask[arr[ind]] != 0) {
-	      C[3] += map[arr[ind++]];
-	      ++Nquad;
-	    }
-	  }
-	  C[2] += map[p[2]] * C[3];
-	}
-	C[1] += map[p[1]] * C[2];
+        p[1] = arr[ind++];
+        N[2] = arr[ind++];
+        C[2] = 0.0;
+        for (int n2=0; n2 < N[2]; ++n2) {
+          p[2] = arr[ind++];
+          N[3] = arr[ind++];
+          if ((mask[p[1]] == 0) || (mask[p[2]] == 0)) {
+            // Short circuit.  We know we can skip ahead.
+            ind += N[3];
+            continue;
+          }
+          C[3] = 0.0;
+          for (int n3=0; n3 < N[3]; ++n3) {
+            if (mask[arr[ind]] != 0) {
+              C[3] += map[arr[ind++]];
+              ++Nquad;
+            }
+          }
+          C[2] += map[p[2]] * C[3];
+        }
+        C[1] += map[p[1]] * C[2];
       }
       C[0] += map[p[0]] * C[1];
     }
@@ -321,38 +321,38 @@ namespace Npoint_Functions {
       N[1] = arr[ind++];
       std::fill (C1.begin(), C1.end(), 0.0);
       for (int n1=0; n1 < N[1]; ++n1) {
-	p[1] = arr[ind++];
-	N[2] = arr[ind++];
-	std::fill (C2.begin(), C2.end(), 0.0);
-	for (int n2=0; n2 < N[2]; ++n2) {
-	  p[2] = arr[ind++];
-	  N[3] = arr[ind++];
-	  if ((mask[p[1]] == 0) || (mask[p[2]] == 0)) {
-	    // Short circuit.  We know we can skip ahead.
-	    ind += N[3];
-	    continue;
-	  }
-	  std::fill (C3.begin(), C3.end(), 0.0);
-	  for (int n3=0; n3 < N[3]; ++n3) {
-	    if (mask[arr[ind]] != 0) {
-	      for (size_t j=0; j < C3.size(); ++j)
-		C3[j] += maps[j][arr[ind]];
-	      ++Nquad;
-	    }
-	    ++ind;
-	  }
-	  for (size_t j=0; j < C2.size(); ++j)
-	    C2[j] += maps[j][p[2]] * C3[j];
-	}
-	for (size_t j=0; j < C2.size(); ++j)
-	  C1[j] += maps[j][p[1]] * C2[j];
+        p[1] = arr[ind++];
+        N[2] = arr[ind++];
+        std::fill (C2.begin(), C2.end(), 0.0);
+        for (int n2=0; n2 < N[2]; ++n2) {
+          p[2] = arr[ind++];
+          N[3] = arr[ind++];
+          if ((mask[p[1]] == 0) || (mask[p[2]] == 0)) {
+            // Short circuit.  We know we can skip ahead.
+            ind += N[3];
+            continue;
+          }
+          std::fill (C3.begin(), C3.end(), 0.0);
+          for (int n3=0; n3 < N[3]; ++n3) {
+            if (mask[arr[ind]] != 0) {
+              for (size_t j=0; j < C3.size(); ++j)
+                C3[j] += maps[j][arr[ind]];
+              ++Nquad;
+            }
+            ++ind;
+          }
+          for (size_t j=0; j < C2.size(); ++j)
+            C2[j] += maps[j][p[2]] * C3[j];
+        }
+        for (size_t j=0; j < C2.size(); ++j)
+          C1[j] += maps[j][p[1]] * C2[j];
       }
       for (size_t j=0; j < C4.size(); ++j)
-	C4[j] += maps[j][p[0]] * C1[j];
+        C4[j] += maps[j][p[0]] * C1[j];
     }
     if (Nquad > 0) {
       for (size_t j=0; j < C4.size(); ++j)
-	C4[j] /= Nquad;
+        C4[j] /= Nquad;
     }
   }
 

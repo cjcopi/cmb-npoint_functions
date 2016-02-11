@@ -19,7 +19,7 @@
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
-  ("$Id$");
+  ("$Id: Twopt_Table.h,v 1.22 2016/02/09 20:31:44 copi Exp $");
   /// @endcond
 }
 
@@ -97,9 +97,9 @@ namespace Npoint_Functions {
       std::fill (&buf_full.get()[0], &buf_full.get()[Nelem], -1);
       // Fill in values
       for (size_t p=0; p < Npix(); ++p) {
-	for (size_t j=0; j < table_write[p].size(); ++j) {
-	  buf_full.get()[p*Nmax()+j] = table_write[p][j];
-	}
+        for (size_t j=0; j < table_write[p].size(); ++j) {
+          buf_full.get()[p*Nmax()+j] = table_write[p][j];
+        }
       }
 
       size_t Nbytes = Nelem * sizeof(T);
@@ -111,7 +111,7 @@ namespace Npoint_Functions {
      *  The Nmax() and Npix() MUST be set correctly before calling.
      */
     bool read_table_from_stream (std::ifstream& in,
-				 std::tr1::shared_ptr<T> *buf)
+                                 std::tr1::shared_ptr<T> *buf)
     {
       size_t Nelem = Nmax()*Npix();
       *buf = std::tr1::shared_ptr<T>(new T [Nelem]);
@@ -131,15 +131,15 @@ namespace Npoint_Functions {
       // First version
       in.read (&version, sizeof(version));
       if (version != 3) {
-	std::cerr << "Twopt_Table only supports file format version 3\n";
-	return false;
+        std::cerr << "Twopt_Table only supports file format version 3\n";
+        return false;
       }
       in.read (reinterpret_cast<char*>(&cosbin), sizeof(cosbin));
       in.read (reinterpret_cast<char*>(&nside), sizeof(nside));
       in.read (reinterpret_cast<char*>(&Npix), sizeof(Npix));
       pixlist.resize(Npix);
       for (size_t p=0; p < Npix; ++p) {
-	in.read (reinterpret_cast<char*>(&pixlist[p]), sizeof(T));
+        in.read (reinterpret_cast<char*>(&pixlist[p]), sizeof(T));
       }
       char s;
       in.read (&s, sizeof(s));
@@ -155,14 +155,14 @@ namespace Npoint_Functions {
     //@{
     /// Generic constructor.
     Twopt_Table () : table_write(), table_read(), pixlist(), cosbin(0),
-		     nside(0), nmax(0), scheme(NEST) {} 
+                     nside(0), nmax(0), scheme(NEST) {} 
     /** Construct and initialize a table given the pixel list and the
      *  values of the bins.
      */
     Twopt_Table (size_t Nside, const std::vector<T>& pl,
-		 double binvalue, Healpix_Ordering_Scheme s=NEST)
+                 double binvalue, Healpix_Ordering_Scheme s=NEST)
       : table_write(pl.size()), table_read(), pixlist(pl),
-	cosbin(binvalue), nside(Nside), nmax(0), scheme(s) {}
+        cosbin(binvalue), nside(Nside), nmax(0), scheme(s) {}
     //@}
 
     /// Add an entry to the two point table.
@@ -193,15 +193,15 @@ namespace Npoint_Functions {
       char version = 3;
       size_t Npix = pixlist.size();
       std::ofstream out (filename.c_str(),
-			 std::fstream::out | std::fstream::trunc
-			 | std::fstream::binary);
+                         std::fstream::out | std::fstream::trunc
+                         | std::fstream::binary);
       // First header
       out.write (&version, sizeof(version));
       out.write (reinterpret_cast<char*>(&cosbin), sizeof(cosbin));
       out.write (reinterpret_cast<char*>(&nside), sizeof(nside));
       out.write (reinterpret_cast<char*>(&Npix), sizeof(Npix));
       for (size_t p=0; p < Npix; ++p) {
-	out.write (reinterpret_cast<char*>(&pixlist[p]), sizeof(T));
+        out.write (reinterpret_cast<char*>(&pixlist[p]), sizeof(T));
       }
       char s = 0;
       if (scheme == RING) s = 1;
@@ -210,7 +210,7 @@ namespace Npoint_Functions {
       // Now figure out what the maximum number of values in a pixel bin are
       nmax = 0;
       for (size_t p=0; p < Npix; ++p) {
-	nmax = std::max (nmax, table_write[p].size());
+        nmax = std::max (nmax, table_write[p].size());
       }
       out.write (reinterpret_cast<char*>(&nmax), sizeof(nmax));
 
@@ -229,7 +229,7 @@ namespace Npoint_Functions {
       bool status;
 
       std::ifstream in (filename.c_str(),
-			std::fstream::in | std::fstream::binary);
+                        std::fstream::in | std::fstream::binary);
       if (! in) return false;
 
       // First the header
@@ -237,7 +237,7 @@ namespace Npoint_Functions {
 
       // Then the table
       if (status) {
-	status = read_table_from_stream (in, &table_read);
+        status = read_table_from_stream (in, &table_read);
       }
 
       in.close();
@@ -257,7 +257,7 @@ namespace Npoint_Functions {
       bool status;
 
       std::ifstream in (filename.c_str(),
-			std::fstream::in | std::fstream::binary);
+                        std::fstream::in | std::fstream::binary);
       if (! in) return false;
 
       status = read_header_from_stream (in, version);

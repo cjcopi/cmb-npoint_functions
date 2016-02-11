@@ -10,7 +10,7 @@
 
 namespace {
   const std::string CALCULATE_EQUILATERAL_THREEPT_CORRELATION_FUNCTION_RCSID
-  ("$Id$");
+  ("$Id: calculate_equilateral_threept_correlation_function.cpp,v 1.7 2016/02/09 20:31:44 copi Exp $");
 }
 
 
@@ -48,14 +48,14 @@ int main (int argc, char *argv[])
       twopt_table.read_file (twopt_table_list[k]);
       // Cast to quiet the compiler about the signed/unsigned comparison.
       if ((size_t)map.Npix() < twopt_table.Npix()) {
-      	std::cerr << "Map does not have enough pixels.\n";
-	std::exit(1);
+              std::cerr << "Map does not have enough pixels.\n";
+        std::exit(1);
       }
       triangles.find_triangles (twopt_table);
       C3 = 0;
       for (size_t j=0; j < triangles.size(); ++j) {
-	C3 += map[triangles.get(j,0)] * map[triangles.get(j,1)]
-	  * map[triangles.get(j,2)];
+        C3 += map[triangles.get(j,0)] * map[triangles.get(j,1)]
+          * map[triangles.get(j,2)];
       }
       if (triangles.size() != 0) C3 /= triangles.size();
       bin_list[k] = triangles.lengths()[0];
@@ -66,7 +66,7 @@ int main (int argc, char *argv[])
   for (size_t k=0; k < bin_list.size(); ++k) {
     // Same format as spice
     std::cout << std::acos(bin_list[k]) << " " << bin_list[k] << " "
-	      << Corr[k] << std::endl;
+              << Corr[k] << std::endl;
   }
 
   return 0;

@@ -21,7 +21,7 @@
 
 namespace {
   const std::string CALCULATE_LCDM_FOURPT_CORRELATION_FUNCTION_RCSID
-  ("$Id$");
+  ("$Id: calculate_LCDM_fourpt_correlation_function.cpp,v 1.8 2016/02/09 20:31:44 copi Exp $");
 }
 
 
@@ -29,7 +29,7 @@ void usage (const char *progname)
 {
   std::cerr << "Usage: " << progname << " <cl fits file>"
             << " <quad list prefix> <num maps to generate>"
-	    << " [<mask file>>]\n";
+            << " [<mask file>>]\n";
   exit (1);
 }
 
@@ -68,10 +68,10 @@ int main (int argc, char *argv[])
     qlf.initialize (quad_list_files[0]);
     if (have_mask) {
       if (static_cast<size_t>(mask.Nside()) != qlf.Nside()) {
-	std::cerr << "Mask and quadrilateral lists do not have"
-		  << " the same Nside: " << mask.Nside() 
-		  << " != " << qlf.Nside() << std::endl;
-	std::exit(1);
+        std::cerr << "Mask and quadrilateral lists do not have"
+                  << " the same Nside: " << mask.Nside() 
+                  << " != " << qlf.Nside() << std::endl;
+        std::exit(1);
       }
       if (mask.Scheme() != qlf.Scheme()) mask.swap_scheme();
     }
@@ -95,7 +95,7 @@ int main (int argc, char *argv[])
     {
       unsigned int seed[4];
       std::ifstream inseed ("/dev/urandom",
-			    std::fstream::in | std::fstream::binary);
+                            std::fstream::in | std::fstream::binary);
       inseed.read (reinterpret_cast<char*>(seed), sizeof(seed));
       inseed.close();
       rng.seed (seed[0], seed[1], seed[2], seed[3]);
@@ -121,24 +121,24 @@ int main (int argc, char *argv[])
 #pragma omp for schedule(dynamic,2)
     for (size_t k=0; k < quad_list_files.size(); ++k) {
       if (! qlf.initialize (quad_list_files[k])) {
-	std::cerr << "Error initializing quadrilateral list from "
-		  << quad_list_files[k] << std::endl;
-	std::exit(1);
+        std::cerr << "Error initializing quadrilateral list from "
+                  << quad_list_files[k] << std::endl;
+        std::exit(1);
       }
 
       bin_list[k] = qlf.bin_value();
       if (have_mask) {
-	Npoint_Functions::calculate_masked_fourpoint_function_list
-	  (maps, mask, qlf, Corr[k]);
+        Npoint_Functions::calculate_masked_fourpoint_function_list
+          (maps, mask, qlf, Corr[k]);
       } else {
-	Npoint_Functions::calculate_fourpoint_function_list
-	  (maps, qlf, Corr[k]);
+        Npoint_Functions::calculate_fourpoint_function_list
+          (maps, qlf, Corr[k]);
       }
     }
   }
   
   std::cout << "# LCDM four point function from " << quad_list_prefix
-	    << std::endl;
+            << std::endl;
   std::cout << "# First line is bin values, rest are the four point function.\n";
   for (size_t k=0; k < bin_list.size(); ++k) {
     std::cout << bin_list[k] << " ";

@@ -16,7 +16,7 @@
 
 namespace {
   const std::string CREATE_RHOMBIC_QUADRILATERALS_LIST_PARALLEL_RCSID
-  ("$Id$");
+  ("$Id: create_rhombic_quadrilaterals_list_parallel.cpp,v 1.4 2016/02/09 20:31:44 copi Exp $");
 }
 
 /// @cond NODOC
@@ -123,7 +123,7 @@ void write_quad_buffer (const simple_vector<int>& quad_buf)
   {
     for (size_t j=0; j < quad_buf.size(); j+=4) {
       for (int k=0; k < 4; ++k) {
-	std::cout << quad_buf[j+k] << " ";
+        std::cout << quad_buf[j+k] << " ";
       }
       std::cout << std::endl;
     }
@@ -131,8 +131,8 @@ void write_quad_buffer (const simple_vector<int>& quad_buf)
 }
 
 void add_quads (const std::vector<int>& tri,
-		const std::vector<int>& thirdpt,
-		simple_vector<int>& quad_buf)
+                const std::vector<int>& thirdpt,
+                simple_vector<int>& quad_buf)
 {
   for (size_t j=0; j < thirdpt.size(); ++j) {
     for (size_t i=0; i < tri.size(); ++i) quad_buf.push_back(tri[i]);
@@ -202,49 +202,49 @@ int main (int argc, char *argv[])
       pix = pixel_list[j].pixnum; // shorthand
       q.initialize(pix);
       while (q.next(tri, thirdpt)) {
-	// First add the quads.
-	add_quads (tri, thirdpt, quad_buf);
-	// Next shift by base pixel 3 times.
-	for (int n=0; n < 3; ++n) {
-	  pixtrans.shift_by_base (tri);
-	  pixtrans.shift_by_base (thirdpt);
-	  add_quads (tri, thirdpt, quad_buf);
-	}
-	// Then reflect through z=0 line
-	pixtrans.reflect_through_z0 (tri);
-	pixtrans.reflect_through_z0 (thirdpt);
-	add_quads (tri, thirdpt, quad_buf);
-	// and shift by base pixel 3 times.
-	for (int n=0; n < 3; ++n) {
-	  pixtrans.shift_by_base (tri);
-	  pixtrans.shift_by_base (thirdpt);
-	  add_quads (tri, thirdpt, quad_buf);
-	}
+        // First add the quads.
+        add_quads (tri, thirdpt, quad_buf);
+        // Next shift by base pixel 3 times.
+        for (int n=0; n < 3; ++n) {
+          pixtrans.shift_by_base (tri);
+          pixtrans.shift_by_base (thirdpt);
+          add_quads (tri, thirdpt, quad_buf);
+        }
+        // Then reflect through z=0 line
+        pixtrans.reflect_through_z0 (tri);
+        pixtrans.reflect_through_z0 (thirdpt);
+        add_quads (tri, thirdpt, quad_buf);
+        // and shift by base pixel 3 times.
+        for (int n=0; n < 3; ++n) {
+          pixtrans.shift_by_base (tri);
+          pixtrans.shift_by_base (thirdpt);
+          add_quads (tri, thirdpt, quad_buf);
+        }
 
-	// If we have a base0 pixel we are done
-	if (pixel_list[j].basepix == PixelInfo::BASE0) continue;
+        // If we have a base0 pixel we are done
+        if (pixel_list[j].basepix == PixelInfo::BASE0) continue;
 
-	// Otherwise we have more transformations to do.
-	// Reflect through z-axis
-	pixtrans.reflect_through_zaxis (tri);
-	pixtrans.reflect_through_zaxis (thirdpt);
-	add_quads (tri, thirdpt, quad_buf);
-	// and shift by base pixel 3 times.
-	for (int n=0; n < 3; ++n) {
-	  pixtrans.shift_by_base (tri);
-	  pixtrans.shift_by_base (thirdpt);
-	  add_quads (tri, thirdpt, quad_buf);
-	}
-	// Then reflect through z=0 line
-	pixtrans.reflect_through_z0 (tri);
-	pixtrans.reflect_through_z0 (thirdpt);
-	add_quads (tri, thirdpt, quad_buf);
-	// and shift by base pixel 3 times.
-	for (int n=0; n < 3; ++n) {
-	  pixtrans.shift_by_base (tri);
-	  pixtrans.shift_by_base (thirdpt);
-	  add_quads (tri, thirdpt, quad_buf);
-	}
+        // Otherwise we have more transformations to do.
+        // Reflect through z-axis
+        pixtrans.reflect_through_zaxis (tri);
+        pixtrans.reflect_through_zaxis (thirdpt);
+        add_quads (tri, thirdpt, quad_buf);
+        // and shift by base pixel 3 times.
+        for (int n=0; n < 3; ++n) {
+          pixtrans.shift_by_base (tri);
+          pixtrans.shift_by_base (thirdpt);
+          add_quads (tri, thirdpt, quad_buf);
+        }
+        // Then reflect through z=0 line
+        pixtrans.reflect_through_z0 (tri);
+        pixtrans.reflect_through_z0 (thirdpt);
+        add_quads (tri, thirdpt, quad_buf);
+        // and shift by base pixel 3 times.
+        for (int n=0; n < 3; ++n) {
+          pixtrans.shift_by_base (tri);
+          pixtrans.shift_by_base (thirdpt);
+          add_quads (tri, thirdpt, quad_buf);
+        }
       }
     }
     write_quad_buffer (quad_buf);
