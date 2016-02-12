@@ -28,29 +28,7 @@ USE_LIB_HEALPIX=create_twopt_table calculate_twopt_correlation_function \
 	test_rhombic_quadrilaterals \
 	create_rhombic_quadrilaterals_list \
 	create_rhombic_quadrilaterals_list_parallel
-# Targets that may use compression
-USE_COMPRESSION=create_twopt_table \
-	calculate_twopt_correlation_function \
-	calculate_equilateral_threept_correlation_function \
-	calculate_isosceles_threept_correlation_function \
-	calculate_fourpt_correlation_function \
-	calculate_LCDM_fourpt_correlation_function \
-	test_rhombic_quadrilaterals \
-	create_rhombic_quadrilaterals_list \
-	create_rhombic_quadrilaterals_list_parallel
-ifdef USE_NO_COMPRESSION
-	override DEFINES+=-DUSE_NO_COMPRESSION
-	COMPRESSION_WRAPPER=No_Compression_Wrapper.h
-else ifdef USE_LZMA_COMPRESSION
-	override DEFINES+=-DUSE_LZMA_COMPRESSION
-	USE_LIB_LZMA=$(USE_COMPRESSION)
-	USE_LIB_Z=
-	COMPRESSION_WRAPPER=LZMA_Wrapper.h
-else
-	USE_LIB_Z=$(USE_COMPRESSION)
-	USE_LIB_LZMA=
-	COMPRESSION_WRAPPER=ZLIB_Wrapper.h
-endif
+
 # Targets that are built with openmp by default.  To turn this off for a
 # compilation invoke make as
 # make target OPENMP=
@@ -65,7 +43,7 @@ OPENMP_DEFAULT=create_twopt_table calculate_twopt_correlation_function \
 EXTRA_TARGETS=
 
 # Sort also removes duplicates which is what we really want.
-ALL_TARGETS=$(sort $(USE_LIB_HEALPIX) $(USE_COMPRESSION) \
+ALL_TARGETS=$(sort $(USE_LIB_HEALPIX) \
                    $(OPENMP_DEFAULT) $(EXTRA_TARGETS) )
 
 CPPFLAGS=$(INCLUDES) $(OPTIMIZE) $(DEFINES)
@@ -75,13 +53,6 @@ all :
 	@echo Available targets:
 # Print the targets one per line
 	@echo $(ALL_TARGETS) | sed 's/\s/\n/g' | sed 's/^/  /g'
-	@echo Use a command like: make target USE_LZMA_COMPRESSION=1
-	@echo to use LZMA compression instead of libz.
-	@echo Use a command like: make target USE_NO_COMPRESSION=1
-	@echo to use no compression.
-	@echo "  [Note that libz is about 5 times faster in creating two"
-	@echo "   point tables and slightly faster in calculating the two point"
-	@echo "  correlation function.]"
 	@echo
 
 # Rule for linking all the targets
@@ -131,21 +102,17 @@ create_rhombic_quadrilaterals_list_parallel : \
 
 # Individual file dependencies
 create_twopt_table.o : create_twopt_table.cpp \
-	buffered_pair_binary_file.h Twopt_Table.h \
-	$(COMPRESSION_WRAPPER)
+	buffered_pair_binary_file.h Twopt_Table.h
 calculate_twopt_correlation_function.o : \
 	calculate_twopt_correlation_function.cpp \
-	Twopt_Table.h \
-	$(COMPRESSION_WRAPPER)
+	Twopt_Table.h
 calculate_equilateral_threept_correlation_function.o : \
 	calculate_equilateral_threept_correlation_function.cpp \
 	Twopt_Table.h Pixel_Triangles.h \
-	$(COMPRESSION_WRAPPER) \
 	Npoint_Functions_Utils.h
 calculate_isosceles_threept_correlation_function.o : \
 	calculate_isosceles_threept_correlation_function.cpp \
 	Twopt_Table.h Pixel_Triangles.h \
-	$(COMPRESSION_WRAPPER) \
 	Npoint_Functions_Utils.h
 calculate_fourpt_correlation_function.o : \
 	calculate_fourpt_correlation_function.cpp \
@@ -162,13 +129,10 @@ calculate_constrained_fourpt_correlation_function.o : \
 test_rhombic_quadrilaterals.o : \
 	test_rhombic_quadrilaterals.cpp \
 	Twopt_Table.h Pixel_Triangles.h Pixel_Quadrilaterals.h \
-	$(COMPRESSION_WRAPPER) \
 	Npoint_Functions_Utils.h
 create_rhombic_quadrilaterals_list.o : \
 	create_rhombic_quadrilaterals_list.cpp \
-	Twopt_Table.h Pixel_Triangles.h Pixel_Quadrilaterals.h \
-	$(COMPRESSION_WRAPPER)
+	Twopt_Table.h Pixel_Triangles.h Pixel_Quadrilaterals.h
 create_rhombic_quadrilaterals_list_parallel.o : \
 	create_rhombic_quadrilaterals_list_parallel.cpp \
-	Twopt_Table.h Pixel_Triangles.h Pixel_Quadrilaterals.h \
-	$(COMPRESSION_WRAPPER)
+	Twopt_Table.h Pixel_Triangles.h Pixel_Quadrilaterals.h

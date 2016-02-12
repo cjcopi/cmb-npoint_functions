@@ -8,14 +8,6 @@
 
 #include <healpix_base.h> // For Healpix_Ordering_Scheme
 
-#if defined(USE_NO_COMPRESSION)
-#  include <No_Compression_Wrapper.h>
-#elif defined(USE_LZMA_COMPRESSION)
-#  include <LZMA_Wrapper.h>
-#else
-#  include <ZLIB_Wrapper.h>
-#endif
-
 namespace {
   /// @cond IDTAG
   const std::string TWOPT_TABLE_RCSID
@@ -66,14 +58,7 @@ namespace Npoint_Functions {
    *  zlib  as the default.
    */
   template<typename T>
-  class Twopt_Table : private
-#if defined(USE_NO_COMPRESSION)
-  No_Compression_Wrapper
-#elif defined(USE_LZMA_COMPRESSION)
-  LZMA_Wrapper
-#else
-  ZLIB_Wrapper
-#endif
+  class Twopt_Table
   {
   private :
     // The write table has to be allowed to grow.
